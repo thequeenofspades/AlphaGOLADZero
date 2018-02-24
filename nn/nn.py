@@ -6,8 +6,10 @@ class NN():
 	def __init__(self):
 		# Learning rate for the AdamOptimizer
 		self.lr = 0.01
-		# Width and height of the game board
-		self.board_dim = 19
+		# Width of the game board
+		self.board_w = 18
+		# Height of the game board
+		self.board_h = 16
 		# Number of actions: birth (0), death (1), or pass (2)
 		self.n_actions = 3
 		# Number of epochs to train
@@ -36,17 +38,17 @@ class NN():
 
 	def add_placeholders(self):
 		# State features for each time step in batch
-		self.state_placeholder = tf.placeholder(tf.int32, (None, self.board_dim, self.board_dim, 3))
+		self.state_placeholder = tf.placeholder(tf.int32, (None, self.board_w, self.board_h, 3))
 		# Self-play winner z
 		self.z = tf.placeholder(tf.int32, (None,))
 		# Action probabilities output by MCTS
 		self.action_probs = tf.placeholder(tf.float32, (None, 3))
 		# Birth coordinate probabilities output by MCTS
-		self.birth_probs = tf.placeholder(tf.float32, (None, self.board_dim**2))
+		self.birth_probs = tf.placeholder(tf.float32, (None, self.board_w*self.board_h))
 		# Sacrifice coordinate probabilities output by MCTS
-		self.sac_probs = tf.placeholder(tf.float32, (None, self.board_dim**2))
+		self.sac_probs = tf.placeholder(tf.float32, (None, self.board_w*self.board_h))
 		# Kill coordinate probabilities output by MCTS
-		self.kill_probs = tf.placeholder(tf.float32, (None, self.board_dim**2))
+		self.kill_probs = tf.placeholder(tf.float32, (None, self.board_w*self.board_h))
 
 	def get_q_values_op(self, scope='Q_scope'):
 		# Right now this is just a single conv layer + max pool + fully connected layer for each output.
@@ -77,19 +79,19 @@ class NN():
 		Outputs the "best" cell for a birth move
 		self.birth_logits = tf.contrib.layers.fully_connected(
 			tf.contrib.layers.flatten(pool1),
-			self.board_dim**2,
+			self.board_w*self.board_h,
 			activation_fn=tf.nn.sigmoid,
 			scope=scope+'/birth')
 		# Outputs the "best" two cells for a sacrifice move
 		self.sac_logits = tf.contrib.layers.fully_connected(
 			tf.contrib.layers.flatten(pool1),
-			self.board_dim**2,
+			self.board_w*self.board_h,
 			activation_fn=tf.nn.sigmoid,
 			scope=scope+'/sacrifice')
 		# Outputs the "best" cell for a death move
 		self.kill_logits = tf.contrib.layers.fully_connected(
 			tf.contrib.layers.flatten(pool1),
-			self.board_dim**2,
+			self.board_w*self.board_h,
 			activation_fn=tf.nn.sigmoid,
 			scope=scope+'/death')
 		# Outputs the predicted winner v
@@ -110,8 +112,7 @@ class NN():
 	def add_train_op(self, scope='Q_scope'):
 		# Minimize training loss
 		optimizer = tf.train.AdamOptimizer(learning_rate=self.lr)
-		var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope)
-		self.train_op = optimizer.minimize(self.loss, var_list=var_list)
+		self.train_op = optimizer.minimize(self.loss)
 
 	def predict(self, states):
 		output_logits = (self.action_logits, self.birth_logits, self.sac_logits, self.kill_logits, self.v)
