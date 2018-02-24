@@ -32,7 +32,7 @@ class Node:
         self.total_visits = 0
         self.prior = prior
         self.untriedMoves = state.GetMoves() # future child nodes
-        self.player = state.get_player() # 0(me) or 1(opponent) TODO: might not be necessary since perspective of v is taken care of by NN
+        self.player = state.current_player # 0(me) or 1(opponent) TODO: might not be necessary since perspective of v is taken care of by NN
         self.state = state
         
     def UCTSelectChild(self, c_puct=1.0):
@@ -103,7 +103,7 @@ def UCT(rootstate, itermax, verbose = False):
 
         # Backpropagate
         while node != None: # backpropagate from the expanded node and work back to the root node
-            if node.player == state.get_player():
+            if node.player == state.current_player:
                 node.Update(v) # Update node with result from POV of node.player
             else:
                 node.Update(-v)

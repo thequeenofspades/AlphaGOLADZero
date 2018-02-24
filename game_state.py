@@ -49,16 +49,14 @@ class GOLADState(GameState):
         The board is a 2D array where 0 = empty (.), 1 = player 0 (0), 2 = player 1 (1).
     """
     def __init__(self, field):
-        self.playerJustMoved = 1 # At the root pretend the player just moved is p1 - p0 has the first move
+        self.current_player = 0
         self.field = field
 
     def Clone(self):
         """ Create a deep clone of this game state.
         """
         st = GOLADState(self.field.Clone())
-        st.playerJustMoved = self.playerJustMoved
-        st.myid = self.myid
-        st.oppid = self.oppid
+        st.current_player = self.current_player
         return st
 
     def Convert(self):
@@ -82,7 +80,7 @@ class GOLADState(GameState):
         if move[0] == MoveType.KILL:
             self.field.cell[move[1].x][move[1].y] = '.'
         elif move[0] == MoveType.BIRTH:
-            self.field.cell[move[1].x][move[1].y] = self.myid
+            self.field.cell[move[1].x][move[1].y] = str(self.current_player)
             self.field.cell[move[2][0].x][move[2][0].y] = '.'
             self.field.cell[move[2][1].x][move[2][1].y] = '.'
         elif move[0] == MoveType.PASS:
@@ -91,8 +89,8 @@ class GOLADState(GameState):
         # Simulate the game for 1 step
         cell_map = self.field.get_cell_mapping()
         dead_cells = cell_map.get('.', [])
-        my_cells = cell_map.get(self.myid, [])
-        opp_cells = cell_map.get(self.oppid, [])
+        my_cells = cell_map.get(str(self.current_player), [])
+        opp_cells = cell_map.get(str(1 - self.current_player), [])
         living_cells = my_cells + opp_cells
 
         new_field = self.field.Clone()
@@ -109,13 +107,13 @@ class GOLADState(GameState):
         self.field = new_field
 
         # Flip turn player
-        self.playerJustMoved = 1 - self.playerJustMoved
+        self.current_player = 1 - self.current_player
 
     def GetMoves(self):
         """ Get all possible moves from this state.
         """
         moves = []
-#         curr_player_cell = "0" if self.playerJustMoved==0 else "1"
+#         curr_player_cell = "0" if self.current_player==0 else "1"
 #         cells_empty = []
 #         cells_self = []
 #         for i in range(self.width):
@@ -126,8 +124,8 @@ class GOLADState(GameState):
 #                     cells_self.append((i,j))
         cell_map = self.field.get_cell_mapping()
         dead_cells = cell_map.get('.', [])
-        my_cells = cell_map.get(self.myid, [])
-        opp_cells = cell_map.get(self.oppid, [])
+        my_cells = cell_map.get(str(self.current_player), [])
+        opp_cells = cell_map.get(str(1 - self.current_player), [])
         living_cells = my_cells + opp_cells
         # Generate kill moves
         for kill_cell in living_cells:
@@ -148,8 +146,8 @@ class GOLADState(GameState):
         """ Get the game result from the viewpoint of playerjm. 
         """
         cell_map = self.field.get_cell_mapping()
-        my_cells = cell_map.get(self.myid, [])
-        opp_cells = cell_map.get(self.oppid, [])
+        my_cells = cell_map.get(str(self.current_player), [])
+        opp_cells = cell_map.get(str(1 - self.current_player), [])
         if (len(my_cells) > 0) and (len(opp_cells) <= 0):
             return 1.0
         elif (len(my_cells) <= 0) and (len(opp_cells) > 0):
@@ -162,9 +160,6 @@ class GOLADState(GameState):
 #         if jmcount > notjmcount: return 1.0
 #         elif notjmcount > jmcount: return 0.0
 #         else: return 0.5 # draw
-
-    def get_player(self):
-        return 1 - self.playerJustMoved
 
     def __repr__(self):
         s= ""
