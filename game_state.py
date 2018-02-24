@@ -72,14 +72,15 @@ class GOLADState(GameState):
 
     def Convert(self):
         # Convert the state to the state representation expected by the neural network in nn/nn.py
-        state = np.zeros((len(self.field), len(self.field), 3))
-        for i in range(len(self.field)):
-            for j in range(len(self.field)):
-                if self.field[i][j] == '0':
+        cells = self.field.cells
+        state = np.zeros((self.field.width, self.field.height, 3))
+        for i in range(self.field.width):
+            for j in range(self.field.height):
+                if self.cells[i][j] == '0':
                     state[i,j,0] = 1
-                elif self.field[i][j] == '1':
+                elif self.cells[i][j] == '1':
                     state[i,j,1] = 1
-                state[i,j,2] = (self.playerJustMoved + 1) % 2
+                state[i,j,2] = self.current_player
         return state
 
     def DoMove(self, move):
