@@ -101,7 +101,6 @@ class Game:
 
         while not stdin.closed and not_finished:
             try:
-                stdout.write("LOOP")
                 current_line = stdin.readline().rstrip('\r\n')
 
                 if len(current_line) <= 0:

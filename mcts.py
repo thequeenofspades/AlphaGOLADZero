@@ -18,9 +18,6 @@
 
 import numpy as np
 
-from bot.bot import Bot
-from bot.game import Game
-
 from game_state import GameState
 from game_state import GOLADState
 
@@ -125,10 +122,10 @@ def UCT(rootstate, itermax, verbose = False):
 def UCTPlayGame():
     """ Self-play using MCTS, returns s_t's, pi_t's, and z to use for training.
     """
-    
-    bot = Bot()
-    game = Game()
-    game.run(bot)
+#     
+#     bot = Bot()
+#     game = Game()
+#     game.run(bot)
     
     # TODO: check result
     

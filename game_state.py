@@ -46,26 +46,17 @@ class GameState:
 class GOLADState(GameState):
     pass
     """ A state of the game of GOLAD, i.e. the game board.
-        The board is a 2D array where 0 = empty (.), 1 = player 1 (X), 2 = player 2 (O).
-        In Othello players alternately place pieces on a square board - each piece played
-        has to sandwich opponent pieces between the piece played and pieces already on the 
-        board. Sandwiched pieces are flipped.
-        This implementation modifies the rules to allow variable sized square boards and
-        terminates the game as soon as the player about to move cannot make a move (whereas
-        the standard game allows for a pass move). 
+        The board is a 2D array where 0 = empty (.), 1 = player 0 (0), 2 = player 1 (1).
     """
-    def __init__(self, field, myid="0", oppid="1"):
+    def __init__(self, field):
         self.playerJustMoved = 1 # At the root pretend the player just moved is p1 - p0 has the first move
         self.field = field
-        self.myid = myid
-        self.oppid = oppid
 
     def Clone(self):
         """ Create a deep clone of this game state.
         """
-        st = GOLADState()
+        st = GOLADState(self.field.Clone())
         st.playerJustMoved = self.playerJustMoved
-        st.field = self.field.Clone()
         st.myid = self.myid
         st.oppid = self.oppid
         return st
@@ -92,8 +83,8 @@ class GOLADState(GameState):
             self.field.cell[move[1].x][move[1].y] = '.'
         elif move[0] == MoveType.BIRTH:
             self.field.cell[move[1].x][move[1].y] = self.myid
-            self.field.cell[move[2].x][move[2].y] = '.'
-            self.field.cell[move[3].x][move[3].y] = '.'
+            self.field.cell[move[2][0].x][move[2][0].y] = '.'
+            self.field.cell[move[2][1].x][move[2][1].y] = '.'
         elif move[0] == MoveType.PASS:
             pass
 
@@ -144,7 +135,7 @@ class GOLADState(GameState):
         # Generate birth moves
         for birth_cell in dead_cells:
             for sacrifice_cells in itertools.combinations(my_cells, 2):
-                moves.append(Move(MoveType.BIRTH, birth_cell, sacrifice_cells[0], sacrifice_cells[1]))
+                moves.append(Move(MoveType.BIRTH, birth_cell, [sacrifice_cells[0], sacrifice_cells[1]]))
         # Generate pass move
         moves.append(Move(MoveType.PASS))
         return moves
@@ -152,7 +143,8 @@ class GOLADState(GameState):
     def IsOnBoard(self, x, y):
         return x >= 0 and x < self.field.width and y >= 0 and y < self.field.height
     
-    def GetResult(self, playerjm):
+#     def GetResult(self, playerjm):
+    def GetResult(self):
         """ Get the game result from the viewpoint of playerjm. 
         """
         cell_map = self.field.get_cell_mapping()
@@ -170,6 +162,9 @@ class GOLADState(GameState):
 #         if jmcount > notjmcount: return 1.0
 #         elif notjmcount > jmcount: return 0.0
 #         else: return 0.5 # draw
+
+    def get_player(self):
+        return 1 - self.playerJustMoved
 
     def __repr__(self):
         s= ""

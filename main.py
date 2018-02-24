@@ -22,7 +22,6 @@ Copyright 2017 riddles.io (developers@riddles.io)
 from bot.game import Game
 from bot.bot import Bot
 
-
 def main():
     bot = Bot()
     game = Game()

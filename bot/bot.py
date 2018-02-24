@@ -4,6 +4,7 @@ from move.move import Move
 from move.move_type import MoveType
 
 from game_state import GOLADState
+from mcts import UCT
 
 class Bot:
 
@@ -33,7 +34,7 @@ class Bot:
         Implement this method to make the bot smarter.
         """
         state = GOLADState(field=game.field, myid=game.me.id, oppid=game.opponent.id)
-        m = UCT(state, itermax = 1000)
+        m = UCT(state, itermax = 5)
 
         # cell_map = game.field.get_cell_mapping()
 
