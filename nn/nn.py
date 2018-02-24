@@ -76,7 +76,6 @@ class NN():
 			activation_fn=tf.nn.sigmoid,
 			scope=scope+'/actions')
 		# Outputs the predicted probabilities for "birthing" in each cell
-		Outputs the "best" cell for a birth move
 		self.birth_logits = tf.contrib.layers.fully_connected(
 			tf.contrib.layers.flatten(pool1),
 			self.board_w*self.board_h,
