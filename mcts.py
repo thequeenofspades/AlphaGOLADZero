@@ -18,6 +18,15 @@
 
 import numpy as np
 
+import itertools
+
+from bot.player import Player
+from bot.game import Game
+from field.point import Point
+from field.field import Field
+from move.move import Move
+from move.move_type import MoveType
+
 class GameState:
     """ A state of the game, i.e. the game board. These are the only functions which are
         absolutely necessary to implement UCT in any 2-player complete information deterministic 
@@ -26,7 +35,7 @@ class GameState:
         By convention the players are numbered 1 and 2.
     """
     def __init__(self):
-            self.playerJustMoved = 2 # At the root pretend the player just moved is player 2 - player 1 has the first move
+        self.playerJustMoved = 2 # At the root pretend the player just moved is player 2 - player 1 has the first move
         
     def Clone(self):
         """ Create a deep clone of this game state.
@@ -53,8 +62,132 @@ class GameState:
         """ Don't need this - but good style.
         """
         pass
-        
+
 class GOLADState(GameState):
+    pass
+    """ A state of the game of GOLAD, i.e. the game board.
+        The board is a 2D array where 0 = empty (.), 1 = player 1 (X), 2 = player 2 (O).
+        In Othello players alternately place pieces on a square board - each piece played
+        has to sandwich opponent pieces between the piece played and pieces already on the 
+        board. Sandwiched pieces are flipped.
+        This implementation modifies the rules to allow variable sized square boards and
+        terminates the game as soon as the player about to move cannot make a move (whereas
+        the standard game allows for a pass move). 
+    """
+    def __init__(self, field, myid="0", oppid="1"):
+        self.playerJustMoved = 1 # At the root pretend the player just moved is p1 - p0 has the first move
+        self.field = field
+        self.myid = myid
+        self.oppid = oppid
+
+    def Clone(self):
+        """ Create a deep clone of this game state.
+        """
+        st = GOLADState()
+        st.playerJustMoved = self.playerJustMoved
+        st.field = self.field.Clone()
+        st.myid = self.myid
+        st.oppid = self.oppid
+        return st
+
+    def DoMove(self, move):
+        """ Update a state by carrying out the given move.
+            Must update playerToMove.
+        """
+        # Apply cell change
+        if move[0] == MoveType.KILL:
+            self.field.cell[move[1].x][move[1].y] = '.'
+        elif move[0] == MoveType.BIRTH:
+            self.field.cell[move[1].x][move[1].y] = self.myid
+            self.field.cell[move[2].x][move[2].y] = '.'
+            self.field.cell[move[3].x][move[3].y] = '.'
+        elif move[0] == MoveType.PASS:
+            pass
+
+        # Simulate the game for 1 step
+        cell_map = self.field.get_cell_mapping()
+        dead_cells = cell_map.get('.', [])
+        my_cells = cell_map.get(self.myid, [])
+        opp_cells = cell_map.get(self.oppid, [])
+        living_cells = my_cells + opp_cells
+
+        new_field = self.field.Clone()
+        for cell in living_cells:
+            count = self.field.count_neighbors(cell.x, cell.y)
+            if count[0] < 2 or count[0] > 3:
+                new_field.cells[cell.x][cell.y] = '.'
+
+        for cell in dead_cells:
+            count = self.field.count_neighbors(cell.x, cell.y)
+            if count[0] == 3:
+                new_field.cells[cell.x][cell.y] = '0' if count[1]>count[2] else '1'
+
+        self.field = new_field
+
+        # Flip turn player
+        self.playerJustMoved = 1 - self.playerJustMoved
+
+    def GetMoves(self):
+        """ Get all possible moves from this state.
+        """
+        moves = []
+#         curr_player_cell = "0" if self.playerJustMoved==0 else "1"
+#         cells_empty = []
+#         cells_self = []
+#         for i in range(self.width):
+#             for j in range(self.height):
+#                 if cell[i][j] == ".":
+#                     cells_empty.append((i,j))
+#                 elif cell[i][j] == curr_player_cell:
+#                     cells_self.append((i,j))
+        cell_map = self.field.get_cell_mapping()
+        dead_cells = cell_map.get('.', [])
+        my_cells = cell_map.get(self.myid, [])
+        opp_cells = cell_map.get(self.oppid, [])
+        living_cells = my_cells + opp_cells
+        # Generate kill moves
+        for kill_cell in living_cells:
+            moves.append(Move(MoveType.KILL, kill_cell))
+        # Generate birth moves
+        for birth_cell in dead_cells:
+            for sacrifice_cells in itertools.combinations(my_cells, 2):
+                moves.append(Move(MoveType.BIRTH, birth_cell, sacrifice_cells[0], sacrifice_cells[1]))
+        # Generate pass move
+        moves.append(Move(MoveType.PASS))
+        return moves
+
+    def IsOnBoard(self, x, y):
+        return x >= 0 and x < self.field.width and y >= 0 and y < self.field.height
+    
+    def GetResult(self, playerjm):
+        """ Get the game result from the viewpoint of playerjm. 
+        """
+        cell_map = self.field.get_cell_mapping()
+        my_cells = cell_map.get(self.myid, [])
+        opp_cells = cell_map.get(self.oppid, [])
+        if (len(my_cells) > 0) and (len(opp_cells) <= 0):
+            return 1.0
+        elif (len(my_cells) <= 0) and (len(opp_cells) > 0):
+            return 0.0
+        else:
+            return 0.5
+
+#         jmcount = len([(x,y) for x in range(self.size) for y in range(self.size) if self.board[x][y] == playerjm])
+#         notjmcount = len([(x,y) for x in range(self.size) for y in range(self.size) if self.board[x][y] == 3 - playerjm])
+#         if jmcount > notjmcount: return 1.0
+#         elif notjmcount > jmcount: return 0.0
+#         else: return 0.5 # draw
+
+    def __repr__(self):
+        s= ""
+        for y in range(self.size-1,-1,-1):
+            for x in range(self.size):
+                s += ".01"[self.board[x][y]]
+            s += "\n"
+        return s
+
+
+class OthelloState(GameState):
     pass
     """ A state of the game of Othello, i.e. the game board.
         The board is a 2D array where 0 = empty (.), 1 = player 1 (X), 2 = player 2 (O).
@@ -169,6 +302,7 @@ class GOLADState(GameState):
             s += "\n"
         return s
 
+
 class Node:
     """ A node in the game tree. 
     """
@@ -270,17 +404,25 @@ def UCT(rootstate, itermax, verbose = False):
 def UCTPlayGame():
     """ Self-play using MCTS, returns s_t's, pi_t's, and z to use for training.
     """
-    state = GOLADState()
-    while (state.GetMoves() != []):
-        print str(state)
-        m = UCT(rootstate = state, itermax = 1000, verbose = False) 
-        print "Best Move: " + str(m) + "\n"
-        state.DoMove(m)
-    if state.GetResult() == 1.0:
-        print "Player " + str(state.get_player()) + " wins!"
-    elif state.GetResult() == 0.0:
-        print "Player " + str(1-state.get_player()) + " wins!"
-    else: print "Nobody wins!"
+    
+    bot = Bot()
+    game = Game()
+    game.run(bot)
+    
+    # TODO: check result
+    
+    # Original Othello impl
+#     state = GOLADState()
+#     while (state.GetMoves() != []):
+#         print str(state)
+#         m = UCT(rootstate = state, itermax = 1000, verbose = False) 
+#         print "Best Move: " + str(m) + "\n"
+#         state.DoMove(m)
+#     if state.GetResult() == 1.0:
+#         print "Player " + str(state.get_player()) + " wins!"
+#     elif state.GetResult() == 0.0:
+#         print "Player " + str(1-state.get_player()) + " wins!"
+#     else: print "Nobody wins!"
 
 if __name__ == "__main__":
     """ Play a single game to the end using UCT for both players. 

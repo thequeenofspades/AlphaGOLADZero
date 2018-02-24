@@ -5,7 +5,6 @@ import time
 from bot.player import Player
 from field.field import Field
 
-
 class Game:
     def __init__(self):
         self.time_per_move = -1

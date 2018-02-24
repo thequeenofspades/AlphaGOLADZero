@@ -3,6 +3,8 @@ import random
 from move.move import Move
 from move.move_type import MoveType
 
+from mcts import UCT
+from mcts import GOLADState
 
 class Bot:
 
@@ -31,6 +33,9 @@ class Bot:
         Performs a Birth or a Kill move, currently returns a random move.
         Implement this method to make the bot smarter.
         """
+        state = GOLADState(field=game.field, myid=game.me.id, oppid=game.opponent.id)
+        m = UCT(state, itermax = 1000)
+
         # cell_map = game.field.get_cell_mapping()
 
         # if random.random() < 0.5:
