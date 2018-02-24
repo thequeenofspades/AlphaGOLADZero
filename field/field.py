@@ -1,4 +1,4 @@
-from field.point import Point
+from point import Point
 
 
 class Field:
@@ -38,9 +38,9 @@ class Field:
                   (x+1,y-1, (x+1,y), (x+1,y+1))]
         for coord in coords:
             if coord[0]>=0 and coord[0]<self.width and coord[1]>=0 and coord[1]<self.height:
-                if self.cells[][] == '0':
+                if self.cells[coord[0]][coord[1]] == '0':
                     count_0 += 1
-                else if self.cells[][] == '1'
+                elif self.cells[coord[0]][coord[1]] == '1':
                     count_1 += 1
         return [count_0 + count_1, count_0, count_1]
 
