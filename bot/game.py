@@ -2,7 +2,7 @@ from sys import stdin, stdout, stderr
 import traceback
 import time
 
-from bot.player import Player
+from player import Player
 from field.field import Field
 
 class Game:
@@ -101,6 +101,7 @@ class Game:
 
         while not stdin.closed and not_finished:
             try:
+                stdout.write("LOOP")
                 current_line = stdin.readline().rstrip('\r\n')
 
                 if len(current_line) <= 0:

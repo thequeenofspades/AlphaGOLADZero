@@ -1,4 +1,4 @@
-from move.move_type import MoveType
+from move_type import MoveType
 
 
 class Move:

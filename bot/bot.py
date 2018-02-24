@@ -3,8 +3,7 @@ import random
 from move.move import Move
 from move.move_type import MoveType
 
-from mcts import UCT
-from mcts import GOLADState
+from game_state import GOLADState
 
 class Bot:
 
