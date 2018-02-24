@@ -77,13 +77,13 @@ class GOLADState(GameState):
             Must update playerToMove.
         """
         # Apply cell change
-        if move[0] == MoveType.KILL:
-            self.field.cell[move[1].x][move[1].y] = '.'
-        elif move[0] == MoveType.BIRTH:
-            self.field.cell[move[1].x][move[1].y] = str(self.current_player)
-            self.field.cell[move[2][0].x][move[2][0].y] = '.'
-            self.field.cell[move[2][1].x][move[2][1].y] = '.'
-        elif move[0] == MoveType.PASS:
+        if move.move_type == MoveType.KILL:
+            self.field.cells[move.target_point.x][move.target_point.y] = '.'
+        elif move.move_type == MoveType.BIRTH:
+            self.field.cells[move.target_point.x][move.target_point.y] = str(self.current_player)
+            self.field.cells[move.sacrifice_points[0].x][move.sacrifice_points[0].y] = '.'
+            self.field.cells[move.sacrifice_points[1].x][move.sacrifice_points[1].y] = '.'
+        elif move.move_type == MoveType.PASS:
             pass
 
         # Simulate the game for 1 step
