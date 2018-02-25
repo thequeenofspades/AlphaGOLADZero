@@ -33,7 +33,7 @@ class Bot:
         Performs a Birth or a Kill move, currently returns a random move.
         Implement this method to make the bot smarter.
         """
-        state = GOLADState(field=game.field, myid=game.me.id, oppid=game.opponent.id)
+        state = GOLADState(field=game.field)
         m = UCT(state, itermax = 5)
 
         # cell_map = game.field.get_cell_mapping()
