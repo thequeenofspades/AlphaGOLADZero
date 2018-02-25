@@ -41,14 +41,8 @@ class NN():
 		self.state_placeholder = tf.placeholder(tf.int32, (None, self.board_w, self.board_h, 3))
 		# Self-play winner z
 		self.z = tf.placeholder(tf.int32, (None,))
-		# Action probabilities output by MCTS
-		self.action_probs = tf.placeholder(tf.float32, (None, 3))
-		# Birth coordinate probabilities output by MCTS
-		self.birth_probs = tf.placeholder(tf.float32, (None, self.board_w*self.board_h))
-		# Sacrifice coordinate probabilities output by MCTS
-		self.sac_probs = tf.placeholder(tf.float32, (None, self.board_w*self.board_h))
-		# Kill coordinate probabilities output by MCTS
-		self.kill_probs = tf.placeholder(tf.float32, (None, self.board_w*self.board_h))
+		# Action probability distribution over grid output by MCTS
+		self.mcts_probs = tf.placeholder(tf.float32, (None, self.board_w*self.board_h))
 
 	def get_q_values_op(self, scope='Q_scope'):
 		# Right now this is just a single conv layer + max pool + fully connected layer for each output.
@@ -69,30 +63,13 @@ class NN():
 			2,
 			scope=scope+'/pool1')
 
-		# Outputs the predicted probabilities for each action
-		self.action_logits = tf.contrib.layers.fully_connected(
+		# Outputs the move probability distribution over the grid
+		self.probs = tf.contrib.layers.fully_connected(
 			tf.contrib.layers.flatten(pool1),
-			self.n_actions,
-			activation_fn=tf.nn.sigmoid,
-			scope=scope+'/actions')
-		# Outputs the predicted probabilities for "birthing" in each cell
-		self.birth_logits = tf.contrib.layers.fully_connected(
-			tf.contrib.layers.flatten(pool1),
-			self.board_w*self.board_h,
-			activation_fn=tf.nn.sigmoid,
-			scope=scope+'/birth')
-		# Outputs the "best" two cells for a sacrifice move
-		self.sac_logits = tf.contrib.layers.fully_connected(
-			tf.contrib.layers.flatten(pool1),
-			self.board_w*self.board_h,
-			activation_fn=tf.nn.sigmoid,
-			scope=scope+'/sacrifice')
-		# Outputs the "best" cell for a death move
-		self.kill_logits = tf.contrib.layers.fully_connected(
-			tf.contrib.layers.flatten(pool1),
-			self.board_w*self.board_h,
-			activation_fn=tf.nn.sigmoid,
-			scope=scope+'/death')
+			self.board_w * self.board_h,
+			activation_fn=tf.nn.softmax,
+			scope=scope+'/probs')
+
 		# Outputs the predicted winner v
 		self.v = tf.contrib.layers.fully_connected(
 			tf.contrib.layers.flatten(pool1),
@@ -103,30 +80,23 @@ class NN():
 	def add_loss(self):
 		# Minimize error between network predictions and MCTS predictions
 		self.loss = tf.square(self.z - self.v)
-		self.loss = self.loss - tf.losses.log_loss(labels=self.action_probs, predictions=self.action_logits)
-		self.loss = self.loss - tf.losses.log_loss(labels=self.birth_probs, predictions=self.birth_logits)
-		self.loss = self.loss - tf.losses.log_loss(labels=self.sac_probs, predictions=self.sac_logits)
-		self.loss = self.loss - tf.losses.log_loss(labels=self.kill_probs, predictions=self.kill_logits)
+		self.loss = self.loss - tf.losses.log_loss(labels=self.mcts_probs, predictions=self.probs)
 
 	def add_train_op(self, scope='Q_scope'):
 		# Minimize training loss
 		optimizer = tf.train.AdamOptimizer(learning_rate=self.lr)
 		self.train_op = optimizer.minimize(self.loss)
 
-	def predict(self, states):
-		output_logits = (self.action_logits, self.birth_logits, self.sac_logits, self.kill_logits, self.v)
-		output_logits = self.sess.run(output_logits, feed_dict={self.state_placeholder: states})
-		return output_logits
+	def evaluate(self, states):
+		probs, v = self.sess.run((probs, v), feed_dict={self.state_placeholder: states})
+		return probs, v
 
-	def update(self, batch_sample):
-		states, z, action_probs, birth_probs, sac_probs, kill_probs = batch_sample
+	def train(self, batch_sample):
+		states, z, mcts_probs = batch_sample
 		for epoch in range(self.epochs):
 			loss, _ = self.sess.run((self.loss, self.train_op), feed_dict={
 				self.state_placeholder: states,
 				self.z: z,
-				self.action_probs: action_probs,
-				self.birth_probs: birth_probs,
-				self.sac_probs: sac_probs,
-				self.kill_probs: kill_probs
+				self.mcts_probs: mcts_probs
 				})
 			print "Loss for epoch %d: %.3f" % (epoch+1, loss)
