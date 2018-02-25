@@ -140,6 +140,32 @@ class GOLADState(GameState):
 
     def IsOnBoard(self, x, y):
         return x >= 0 and x < self.field.width and y >= 0 and y < self.field.height
+
+    def CoordsToIndex(self, x, y):
+        return x*self.field.width + y
+
+    def GetProbabilities(self, net_probs, valid_moves):
+        action_logits, birth_logits, sac_logits, kill_logits, _ = net_probs
+        p = {}
+        for move in valid_moves:
+            if move.move_type == MoveType.BIRTH:
+                p[move] = np.squeeze(action_logits)[0]  # assuming batch size of 1
+                birth_cell = move.target_point
+                sac_cell1, sac_cell2 = move.sacrifice_points
+                p[move] = p[move] * np.squeeze(birth_logits)[self.CoordsToIndex(birth_cell.x, birth_cell.y)]
+                p[move] = p[move] * np.squeeze(sac_logits)[self.CoordsToIndex(sac_cell1.x, sac_cell1.y)]
+                p[move] = p[move] * np.squeeze(sac_logits)[self.CoordsToIndex(sac_cell2.x, sac_cell2.y)]
+            elif move.move_type == MoveType.KILL:
+                p[move] = np.squeeze(action_logits[1])
+                kill_cell = move.target_point
+                p[move] = p[move] * np.squeeze(kill_logits)[self.CoordsToIndex(kill_cell.x, kill_cell.y)]
+            else:
+                p[move] = np.squeeze(action_logits[2])
+        return p
+
+    def GetV(self, net_probs):
+        _, _, _, _, v = net_probs
+        return np.squeeze(v)    # assuming batch size of 1
     
 #     def GetResult(self, playerjm):
     def GetResult(self):
