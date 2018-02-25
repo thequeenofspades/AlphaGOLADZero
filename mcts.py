@@ -17,7 +17,9 @@
 # For more information about Monte Carlo Tree Search check out our web site at www.mcts.ai
 
 import numpy as np
+import random
 
+from field.field import Field
 from game_state import GameState
 from game_state import GOLADState
 
@@ -118,10 +120,37 @@ def UCT(rootstate, itermax, verbose = False):
     exp_visits = np.array([np.pow(c.total_visits, 1./tau) for c in rootnode.childNodes])
     pi = exp_visits / np.sum(exp_visits)
     return np.random.choice(rootnode.childNodes, p=pi).move # return move sampled from pi
-                
+
+def init_cells(width = 18, height = 16, cells_each_player = 50):
+    assert width & 1 == 0
+    assert height & 1 == 0
+    assert (cells_each_player * 2) < (width * height)
+    cells = ["." for _ in xrange(width * height)]
+    for idx in random.sample(range(width * height / 2), cells_each_player):
+        cells[idx] = "0"
+    for idx in random.sample(range(width * height / 2, width * height), cells_each_player):
+        cells[idx] = "1"
+    cells_str = ''.join((cell + ",") for cell in cells)[:-1]
+    return cells_str
+
 def UCTPlayGame():
     """ Self-play using MCTS, returns s_t's, pi_t's, and z to use for training.
     """
+    width = 18
+    height = 16
+    cells_each_player = 50
+
+    field = Field()
+    field.width = width
+    field.height = height
+    field.parse(init_cells(field.width, field.width, cells_each_player))
+    state = GOLADState(field)
+
+    while (state.GetMoves() != []):
+        m = UCT(rootstate = state, itermax = 1000, verbose = False) 
+        print "Best Move: " + str(m) + "\n"
+        state.DoMove(m)
+
 #     
 #     bot = Bot()
 #     game = Game()

@@ -50,7 +50,10 @@ class GOLADState(GameState):
     """
     def __init__(self, field):
         self.current_player = 0
+        self.timestep = 0
+        self.terminal = 0 # 0 (not done), 1 (player0 wins), 2 (player1 wins), 3 (tie)
         self.field = field
+        
 
     def Clone(self):
         """ Create a deep clone of this game state.
@@ -105,14 +108,28 @@ class GOLADState(GameState):
                 new_field.cells[cell.x][cell.y] = '0' if count[1]>count[2] else '1'
 
         self.field = new_field
+        self.timestep += 1
 
         # Flip turn player
         self.current_player = 1 - self.current_player
+
+        # Update self.terminal
+        cell_map = self.field.get_cell_mapping()
+        cells_0 = cell_map.get('0', [])
+        cells_1 = cell_map.get('1', [])
+        if (len(cells_0) > 0) and (len(cells_1) <= 0):
+            self.terminal = 1
+        elif (len(cells_0) <= 0) and (len(cells_1) > 0):
+            self.terminal = 2
+        elif self.timestep >= self.max_timestep:
+            self.terminal = 3
 
     def GetMoves(self):
         """ Get all possible moves from this state.
         """
         moves = []
+        if self.terminal != 0:
+            return []
 #         curr_player_cell = "0" if self.current_player==0 else "1"
 #         cells_empty = []
 #         cells_self = []

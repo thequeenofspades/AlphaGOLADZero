@@ -55,3 +55,10 @@ class Field:
                 cell_map[cell] = cell_type_list
 
         return cell_map
+
+    def pprint(self):
+        for j in xrange(self.height):
+            line = ""
+            for i in xrange(self.width):
+                line = line + self.cells[i][j]
+            print (line)
