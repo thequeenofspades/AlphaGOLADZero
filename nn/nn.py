@@ -22,15 +22,15 @@ class NN():
         self.sess = tf.Session()
 
     def setup(self):
-        add_placeholders()
+        self.add_placeholders()
 
         # Compute Q values and grid probabilities for current state
-        get_q_values_op('Q_scope')
+        self.get_q_values_op('Q_scope')
 
         # Minimize difference between network and MCTS outputs
-        add_loss()
+        self.add_loss()
 
-        add_train_op('Q_scope')
+        self.add_train_op('Q_scope')
 
         # Initialize all variables
         init = tf.global_variables_initializer()
