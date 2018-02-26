@@ -42,7 +42,7 @@ class NN():
 		# Self-play winner z
 		self.z = tf.placeholder(tf.int32, (None,))
 		# Action probability distribution over grid output by MCTS
-		self.mcts_probs = tf.placeholder(tf.float32, (None, self.board_w*self.board_h))
+		self.mcts_probs = tf.placeholder(tf.float32, (None, self.board_w*self.board_h + 1))
 
 	def get_q_values_op(self, scope='Q_scope'):
 		# Right now this is just a single conv layer + max pool + fully connected layer for each output.

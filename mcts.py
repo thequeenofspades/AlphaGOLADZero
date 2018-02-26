@@ -22,6 +22,8 @@ import random
 from field.field import Field
 from game_state import GameState
 from game_state import GOLADState
+from move.move_type import MoveType
+
 
 class Node:
     """ A node in the game tree. 
@@ -97,7 +99,7 @@ def UCT(rootstate, itermax, verbose = False):
             state.DoMove(node.move)
 
         # Expand and Evaluate - use NN to evalute leaf node
-        p, v = state.GetResult() # get outputs from NN
+        p, v = state.GetP(), state.GetV() # get outputs from NN
         for m in node.untriedMoves:
             temp_state = state.Clone()
             temp_state.DoMove(m)
@@ -119,7 +121,17 @@ def UCT(rootstate, itermax, verbose = False):
     tau = 1.
     exp_visits = np.array([np.pow(c.total_visits, 1./tau) for c in rootnode.childNodes])
     pi = exp_visits / np.sum(exp_visits)
-    return np.random.choice(rootnode.childNodes, p=pi).move # return move sampled from pi
+    
+    pi_t = np.zeros((18*16+1))
+    move_tuples = [(c.move.move_type, c.move.target_point, c.move.sacrifice_points) for c in rootnode.childNodes]
+    for i, move_tuple in enumerate(move_tuples):
+        if move_tuple[1] is not None:
+            pi_t[move_tuple[1][0]*move_tuple[1][1]] = pi[i] # TODO: check dtype of move.target_point
+        else: # pass
+            assert move_tuple[0] == MoveType.PASS:
+            pi_t[-1] = pi[i]
+    
+    return np.random.choice(rootnode.childNodes, p=pi).move, pi_t # return move sampled from pi and pi_t
 
 def init_cells(width = 18, height = 16, cells_each_player = 50):
     assert width & 1 == 0
@@ -132,7 +144,7 @@ def init_cells(width = 18, height = 16, cells_each_player = 50):
         cells[idx] = "1"
     cells_str = ''.join((cell + ",") for cell in cells)[:-1]
     return cells_str
-
+    
 def UCTPlayGame():
     """ Self-play using MCTS, returns s_t's, pi_t's, and z to use for training.
     """
@@ -146,11 +158,17 @@ def UCTPlayGame():
     field.parse(init_cells(field.width, field.width, cells_each_player))
     state = GOLADState(field)
 
+    data = {}
+    data['s'] = []
+    data['pi'] = []
     while (state.GetMoves() != []):
-        m = UCT(rootstate = state, itermax = 1000, verbose = False) 
+        m, pi = UCT(rootstate = state, itermax = 1000, verbose = False)
+        data['s'].append(state.Clone())
+        data['pi'] = pi
         print "Best Move: " + str(m) + "\n"
         state.DoMove(m)
 
+    data['z'] = state.GetResult(0) # get result from perspective of first player (ie rootnode)
 #     
 #     bot = Bot()
 #     game = Game()

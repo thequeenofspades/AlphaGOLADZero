@@ -161,7 +161,7 @@ class GOLADState(GameState):
     def CoordsToIndex(self, x, y):
         return x*self.field.width + y
 
-    def GetProbabilities(self, net_probs, valid_moves):
+    def GetP(self, net_probs, valid_moves):
         action_logits, birth_logits, sac_logits, kill_logits, _ = net_probs
         p = {}
         for move in valid_moves:
@@ -185,12 +185,14 @@ class GOLADState(GameState):
         return np.squeeze(v)    # assuming batch size of 1
     
 #     def GetResult(self, playerjm):
-    def GetResult(self):
-        """ Get the game result from the viewpoint of playerjm. 
+    def GetResult(self, player=None):
+        """ Get the final game result from the viewpoint of player or current_player, if None. 
         """
+        if player is None:
+            player = self.current_player
         cell_map = self.field.get_cell_mapping()
-        my_cells = cell_map.get(str(self.current_player), [])
-        opp_cells = cell_map.get(str(1 - self.current_player), [])
+        my_cells = cell_map.get(str(player), [])
+        opp_cells = cell_map.get(str(1 - player), [])
         if (len(my_cells) > 0) and (len(opp_cells) <= 0):
             return 1.0
         elif (len(my_cells) <= 0) and (len(opp_cells) > 0):
