@@ -212,5 +212,5 @@ if __name__ == "__main__":
     """ Play a single game to the end using UCT for both players. 
     """
     nn = NN()
-    UCTPlayGame()
+    UCTPlayGame(nn)
     

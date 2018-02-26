@@ -68,9 +68,9 @@ class GOLADState(GameState):
         state = np.zeros((self.field.width, self.field.height, 3))
         for i in range(self.field.width):
             for j in range(self.field.height):
-                if self.cells[i][j] == '0':
+                if cells[i][j] == '0':
                     state[i,j,0] = 1
-                elif self.cells[i][j] == '1':
+                elif cells[i][j] == '1':
                     state[i,j,1] = 1
                 state[i,j,2] = self.current_player
         return state
