@@ -26,6 +26,8 @@ from move.move_type import MoveType
 
 from nn.nn import NN
 
+import config
+
 
 class Node:
     """ A node in the game tree. 
@@ -92,10 +94,8 @@ def extract_p_move(p, m, all_ms, nn):
         return p[nn.coords_to_idx(m.target_point.x, m.target_point.y)]
     elif m.move_type == MoveType.BIRTH:
         N_birth_moves = np.sum([(_m.move_type==MoveType.BIRTH) and (_m.target_point==m.target_point) for _m in all_ms]) # number of birth moves at target point of given move
-        if N_birth_moves > 0:
-            return p[nn.coords_to_idx(m.target_point.x, m.target_point.y)] / N_birth_moves
-        else:
-            return 0.0
+        assert(N_birth_moves > 0)
+        return p[nn.coords_to_idx(m.target_point.x, m.target_point.y)] / N_birth_moves
     else:
         assert False
     
@@ -108,6 +108,7 @@ def UCT(rootstate, itermax, nn, verbose = False):
     rootnode = Node(player=0, state=rootstate)
 
     for i in range(itermax):
+        #print "Iteration %d" % i
         node = rootnode
         state = rootstate.Clone()
 
@@ -119,7 +120,8 @@ def UCT(rootstate, itermax, nn, verbose = False):
         # Expand and Evaluate - use NN to evalute leaf node
         # p, v = state.GetP(), state.GetV() # get outputs from NN
         p, v = nn.evaluate(state.Convert()) # get outputs from NN
-        all_ms = state.GetMoves()
+        all_ms = node.untriedMoves
+        #print "%d moves" % len(all_ms)
         for m in node.untriedMoves: # replace with while?
             temp_state = state.Clone()
             temp_state.DoMove(m)
@@ -170,9 +172,9 @@ def init_cells(width = 18, height = 16, cells_each_player = 50):
 def UCTPlayGame(nn):
     """ Self-play using MCTS, returns s_t's, pi_t's, and z to use for training.
     """
-    width = 18
-    height = 16
-    cells_each_player = 50
+    width = config.board_width
+    height = config.board_height
+    cells_each_player = config.cells_each_player
 
     field = Field()
     field.width = width
@@ -184,7 +186,7 @@ def UCTPlayGame(nn):
     data['s'] = []
     data['pi'] = []
     while (state.GetMoves() != []):
-        m, pi = UCT(rootstate = state, itermax = 1000, nn=nn, verbose = False)
+        m, pi = UCT(rootstate = state, itermax = config.mcts_itermax, nn=nn, verbose = False)
         data['s'].append(state.Clone())
         data['pi'] = pi
         print "Best Move: " + str(m) + "\n"
@@ -216,7 +218,7 @@ def UCTPlayGame(nn):
 if __name__ == "__main__":
     """ Play a single game to the end using UCT for both players. 
     """
-    nn = NN()
+    nn = NN(config.board_width, config.board_height)
     nn.setup()
     UCTPlayGame(nn)
     

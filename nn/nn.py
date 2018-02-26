@@ -3,13 +3,13 @@ import numpy as np
 import random
 
 class NN():
-    def __init__(self):
+    def __init__(self, board_w, board_h):
         # Learning rate for the AdamOptimizer
         self.lr = 0.01
         # Width of the game board
-        self.board_w = 18
+        self.board_w = board_w
         # Height of the game board
-        self.board_h = 16
+        self.board_h = board_h
         # Number of actions: birth (0), death (1), or pass (2)
         self.n_actions = 3
         # Number of epochs to train
