@@ -24,7 +24,7 @@ from game_state import GameState
 from game_state import GOLADState
 from move.move_type import MoveType
 
-from nn import NN
+from nn.nn import NN
 
 
 class Node:
@@ -86,7 +86,7 @@ class Node:
 def extract_p_move(p, m, all_ms, nn):
     if m.move_type == MoveType.PASS:
         return p[-1]
-    elif: m.move_type == MoveType.KILL:
+    elif m.move_type == MoveType.KILL:
         return p[nn.coords_to_idx(m.target_point[0], m.target_point[1])]
     elif m.move_type == MoveType.BIRTH:
         N_birth_moves = np.sum([(_m.move_type==MoveType.BIRTH) and (_m.target_point==m.target_point) for _m in all_ms]) # number of birth moves at target point of given move
@@ -145,7 +145,7 @@ def UCT(rootstate, itermax, nn, verbose = False):
         if move_tuple[1] is not None:
             pi_t[nn.coords_to_idx(move_tuple[1][0], move_tuple[1][1])] = pi[i] # TODO: check dtype of move.target_point
         else: # pass
-            assert move_tuple[0] == MoveType.PASS:
+            assert move_tuple[0] == MoveType.PASS
             pi_t[-1] = pi[i]
     
     return np.random.choice(rootnode.childNodes, p=pi).move, pi_t # return move sampled from pi and pi_t
