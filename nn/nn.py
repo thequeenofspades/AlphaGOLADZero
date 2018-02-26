@@ -41,7 +41,7 @@ class NN():
 		self.state_placeholder = tf.placeholder(tf.int32, (None, self.board_w, self.board_h, 3))
 		# Self-play winner z
 		self.z = tf.placeholder(tf.int32, (None,))
-		# Action probability distribution over grid output by MCTS
+		# Action probability distribution over grid output by MCTS - kill/birth at each location or pass
 		self.mcts_probs = tf.placeholder(tf.float32, (None, self.board_w*self.board_h + 1))
 
 	def get_q_values_op(self, scope='Q_scope'):

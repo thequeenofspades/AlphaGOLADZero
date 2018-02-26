@@ -47,11 +47,11 @@ class Node:
         node = sorted(self.childNodes, key = lambda c: c.total_rewards/(c.total_visits+1e-10) + c_puct * c.prior * np.sqrt(self.total_visits)/(1 + c.total_visits))[-1]
         return node
     
-    def AddChild(self, m, s, p):
+    def AddChild(self, m, s, p_m):
         """ Remove m from untriedMoves and add a new child node for this move.
             Return the added child node
         """
-        n = Node(player=1-self.player, move=m, parent=self, state=s, prior=p[m])
+        n = Node(player=1-self.player, move=m, parent=self, state=s, prior=p_m)
         self.untriedMoves.remove(m)
         self.childNodes.append(n)
         return n
@@ -83,6 +83,17 @@ class Node:
              s += str(c) + "\n"
         return s
 
+def extract_p_move(p, m, all_ms):
+    if m.move_type == MoveType.PASS:
+        return p[-1]
+    elif: m.move_type == MoveType.KILL:
+        return p[m.target_point[0]*18 + m.target_point[1]]
+    elif m.move_type == MoveType.BIRTH:
+        N_birth_moves = np.sum([(_m.move_type==MoveType.BIRTH) and (_m.target_point==m.target_point) for _m in all_ms]) # number of birth moves at target point of given move
+        return p[m.target_point[0]*18 + m.target_point[1]] / N_birth_moves
+    else:
+        assert False
+    
 
 def UCT(rootstate, itermax, nn, verbose = False):
     """ Conduct a UCT search for itermax iterations starting from rootstate.
@@ -103,10 +114,13 @@ def UCT(rootstate, itermax, nn, verbose = False):
         # Expand and Evaluate - use NN to evalute leaf node
         # p, v = state.GetP(), state.GetV() # get outputs from NN
         p, v = nn.evaluate(state.Convert()) # get outputs from NN
-        for m in node.untriedMoves:
+        all_ms = state.GetMoves()
+        for m in node.untriedMoves: # replace with while?
             temp_state = state.Clone()
             temp_state.DoMove(m)
-            node.AddChild(m, temp_state, p)
+            # compute p_move from p
+            p_move = extract_p_move(p, m, all_ms)
+            node.AddChild(m, temp_state, p_move)
 
         # Backpropagate
         while node != None: # backpropagate from the expanded node and work back to the root node
@@ -129,7 +143,7 @@ def UCT(rootstate, itermax, nn, verbose = False):
     move_tuples = [(c.move.move_type, c.move.target_point, c.move.sacrifice_points) for c in rootnode.childNodes]
     for i, move_tuple in enumerate(move_tuples):
         if move_tuple[1] is not None:
-            pi_t[move_tuple[1][0]*move_tuple[1][1]] = pi[i] # TODO: check dtype of move.target_point
+            pi_t[move_tuple[1][0]*18 + move_tuple[1][1]] = pi[i] # TODO: check dtype of move.target_point
         else: # pass
             assert move_tuple[0] == MoveType.PASS:
             pi_t[-1] = pi[i]
