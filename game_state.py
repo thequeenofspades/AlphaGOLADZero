@@ -159,7 +159,7 @@ class GOLADState(GameState):
         return x >= 0 and x < self.field.width and y >= 0 and y < self.field.height
 
     def CoordsToIndex(self, x, y):
-        return x*self.field.width + y
+        return x*self.field.height + y
 
     def GetP(self, net_probs, valid_moves):
         action_logits, birth_logits, sac_logits, kill_logits, _ = net_probs

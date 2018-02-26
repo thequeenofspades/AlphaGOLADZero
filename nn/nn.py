@@ -100,3 +100,11 @@ class NN():
 				self.mcts_probs: mcts_probs
 				})
 			print "Loss for epoch %d: %.3f" % (epoch+1, loss)
+            
+    def coords_to_idx(self, x, y, major='col'):
+        if major == 'col':
+            return x * self.board_h + y
+        elif major == 'row':
+            return x * self.board_w + y
+        else:
+            assert False, "major must be 'row' or 'col'"

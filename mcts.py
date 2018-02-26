@@ -83,14 +83,14 @@ class Node:
              s += str(c) + "\n"
         return s
 
-def extract_p_move(p, m, all_ms):
+def extract_p_move(p, m, all_ms, nn):
     if m.move_type == MoveType.PASS:
         return p[-1]
     elif: m.move_type == MoveType.KILL:
-        return p[m.target_point[0]*18 + m.target_point[1]]
+        return p[nn.coords_to_idx(m.target_point[0], m.target_point[1])]
     elif m.move_type == MoveType.BIRTH:
         N_birth_moves = np.sum([(_m.move_type==MoveType.BIRTH) and (_m.target_point==m.target_point) for _m in all_ms]) # number of birth moves at target point of given move
-        return p[m.target_point[0]*18 + m.target_point[1]] / N_birth_moves
+        return p[nn.coords_to_idx(m.target_point[0], m.target_point[1])] / N_birth_moves
     else:
         assert False
     
@@ -119,7 +119,7 @@ def UCT(rootstate, itermax, nn, verbose = False):
             temp_state = state.Clone()
             temp_state.DoMove(m)
             # compute p_move from p
-            p_move = extract_p_move(p, m, all_ms)
+            p_move = extract_p_move(p, m, all_ms, nn)
             node.AddChild(m, temp_state, p_move)
 
         # Backpropagate
@@ -139,11 +139,11 @@ def UCT(rootstate, itermax, nn, verbose = False):
     exp_visits = np.array([np.pow(c.total_visits, 1./tau) for c in rootnode.childNodes])
     pi = exp_visits / np.sum(exp_visits)
     
-    pi_t = np.zeros((18*16+1))
+    pi_t = np.zeros((nn.board_w * nn.board_h + 1))
     move_tuples = [(c.move.move_type, c.move.target_point, c.move.sacrifice_points) for c in rootnode.childNodes]
     for i, move_tuple in enumerate(move_tuples):
         if move_tuple[1] is not None:
-            pi_t[move_tuple[1][0]*18 + move_tuple[1][1]] = pi[i] # TODO: check dtype of move.target_point
+            pi_t[nn.coords_to_idx(move_tuple[1][0], move_tuple[1][1])] = pi[i] # TODO: check dtype of move.target_point
         else: # pass
             assert move_tuple[0] == MoveType.PASS:
             pi_t[-1] = pi[i]
