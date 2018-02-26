@@ -24,6 +24,8 @@ from game_state import GameState
 from game_state import GOLADState
 from move.move_type import MoveType
 
+from nn import NN
+
 
 class Node:
     """ A node in the game tree. 
@@ -82,7 +84,7 @@ class Node:
         return s
 
 
-def UCT(rootstate, itermax, verbose = False):
+def UCT(rootstate, itermax, nn, verbose = False):
     """ Conduct a UCT search for itermax iterations starting from rootstate.
         Return the best move from the rootstate.
         Assumes 2 alternating players (player 0 starts), with game rewards {-1, +1}."""
@@ -99,7 +101,8 @@ def UCT(rootstate, itermax, verbose = False):
             state.DoMove(node.move)
 
         # Expand and Evaluate - use NN to evalute leaf node
-        p, v = state.GetP(), state.GetV() # get outputs from NN
+        # p, v = state.GetP(), state.GetV() # get outputs from NN
+        p, v = nn.evaluate(state.Convert()) # get outputs from NN
         for m in node.untriedMoves:
             temp_state = state.Clone()
             temp_state.DoMove(m)
@@ -145,7 +148,7 @@ def init_cells(width = 18, height = 16, cells_each_player = 50):
     cells_str = ''.join((cell + ",") for cell in cells)[:-1]
     return cells_str
     
-def UCTPlayGame():
+def UCTPlayGame(nn):
     """ Self-play using MCTS, returns s_t's, pi_t's, and z to use for training.
     """
     width = 18
@@ -162,13 +165,15 @@ def UCTPlayGame():
     data['s'] = []
     data['pi'] = []
     while (state.GetMoves() != []):
-        m, pi = UCT(rootstate = state, itermax = 1000, verbose = False)
+        m, pi = UCT(rootstate = state, itermax = 1000, nn=nn, verbose = False)
         data['s'].append(state.Clone())
         data['pi'] = pi
         print "Best Move: " + str(m) + "\n"
         state.DoMove(m)
 
     data['z'] = state.GetResult(0) # get result from perspective of first player (ie rootnode)
+    
+    return data
 #     
 #     bot = Bot()
 #     game = Game()
@@ -192,5 +197,6 @@ def UCTPlayGame():
 if __name__ == "__main__":
     """ Play a single game to the end using UCT for both players. 
     """
+    nn = NN()
     UCTPlayGame()
     

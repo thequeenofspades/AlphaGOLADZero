@@ -66,7 +66,7 @@ class NN():
 		# Outputs the move probability distribution over the grid
 		self.probs = tf.contrib.layers.fully_connected(
 			tf.contrib.layers.flatten(pool1),
-			self.board_w * self.board_h,
+			self.board_w * self.board_h + 1,
 			activation_fn=tf.nn.softmax,
 			scope=scope+'/probs')
 
@@ -88,11 +88,11 @@ class NN():
 		self.train_op = optimizer.minimize(self.loss)
 
 	def evaluate(self, states):
-		probs, v = self.sess.run((probs, v), feed_dict={self.state_placeholder: states})
+		probs, v = self.sess.run((self.probs, self.v), feed_dict={self.state_placeholder: states})
 		return probs, v
 
 	def train(self, batch_sample):
-		states, z, mcts_probs = batch_sample
+		states, mcts_probs, z = batch_sample
 		for epoch in range(self.epochs):
 			loss, _ = self.sess.run((self.loss, self.train_op), feed_dict={
 				self.state_placeholder: states,
