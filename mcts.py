@@ -84,13 +84,18 @@ class Node:
         return s
 
 def extract_p_move(p, m, all_ms, nn):
+    if len(p.shape) > 1:
+        p = np.squeeze(p)   # remove batch dimension
     if m.move_type == MoveType.PASS:
         return p[-1]
     elif m.move_type == MoveType.KILL:
-        return p[nn.coords_to_idx(m.target_point[0], m.target_point[1])]
+        return p[nn.coords_to_idx(m.target_point.x, m.target_point.y)]
     elif m.move_type == MoveType.BIRTH:
         N_birth_moves = np.sum([(_m.move_type==MoveType.BIRTH) and (_m.target_point==m.target_point) for _m in all_ms]) # number of birth moves at target point of given move
-        return p[nn.coords_to_idx(m.target_point[0], m.target_point[1])] / N_birth_moves
+        if N_birth_moves > 0:
+            return p[nn.coords_to_idx(m.target_point.x, m.target_point.y)] / N_birth_moves
+        else:
+            return 0.0
     else:
         assert False
     

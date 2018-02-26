@@ -53,7 +53,7 @@ class GOLADState(GameState):
         self.timestep = 0
         self.terminal = 0 # 0 (not done), 1 (player0 wins), 2 (player1 wins), 3 (tie)
         self.field = field
-        
+        self.max_timestep = 100
 
     def Clone(self):
         """ Create a deep clone of this game state.

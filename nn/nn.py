@@ -38,9 +38,9 @@ class NN():
 
     def add_placeholders(self):
         # State features for each time step in batch
-        self.state_placeholder = tf.placeholder(tf.int32, (None, self.board_w, self.board_h, 3))
+        self.state_placeholder = tf.placeholder(tf.float32, (None, self.board_w, self.board_h, 3))
         # Self-play winner z
-        self.z = tf.placeholder(tf.int32, (None,))
+        self.z = tf.placeholder(tf.float32, (None,))
         # Action probability distribution over grid output by MCTS - kill/birth at each location or pass
         self.mcts_probs = tf.placeholder(tf.float32, (None, self.board_w*self.board_h + 1))
 
@@ -88,6 +88,8 @@ class NN():
         self.train_op = optimizer.minimize(self.loss)
 
     def evaluate(self, states):
+        if len(states.shape) == 3:
+            states = np.expand_dims(states, axis=0) # add batch dimension
         probs, v = self.sess.run((self.probs, self.v), feed_dict={self.state_placeholder: states})
         return probs, v
 
