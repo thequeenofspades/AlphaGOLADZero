@@ -35,7 +35,7 @@ class Field:
         count_1 = 0
         coords = [(x-1,y-1), (x-1,y), (x-1,y+1),
                   (x,y-1), (x,y+1),
-                  (x+1,y-1, (x+1,y), (x+1,y+1))]
+                  (x+1,y-1), (x+1,y), (x+1,y+1)]
         for coord in coords:
             if coord[0]>=0 and coord[0]<self.width and coord[1]>=0 and coord[1]<self.height:
                 if self.cells[coord[0]][coord[1]] == '0':
