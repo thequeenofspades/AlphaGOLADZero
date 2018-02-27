@@ -26,7 +26,7 @@ from move.move_type import MoveType
 
 from nn.nn import NN
 
-import config
+from config import config
 
 
 class Node:
@@ -189,6 +189,7 @@ def UCTPlayGame(nn):
         data['s'].append(state.Convert())
         data['pi'].append(pi)
         print "Best Move: " + str(m) + "\n"
+        state.field.pprint()
         state.DoMove(m)
 
     data['z'] = [state.GetResult(0)] * len(data['s']) # get result from perspective of first player (ie rootnode)
@@ -217,7 +218,7 @@ def UCTPlayGame(nn):
 if __name__ == "__main__":
     """ Play a single game to the end using UCT for both players. 
     """
-    nn = NN(config.board_width, config.board_height)
+    nn = NN(config)
     nn.setup()
     UCTPlayGame(nn)
     

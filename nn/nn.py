@@ -3,27 +3,27 @@ import numpy as np
 import random
 
 class NN():
-    def __init__(self, board_w, board_h):
+    def __init__(self, config):
         # Learning rate for the AdamOptimizer
-        self.lr = 0.01
+        self.lr = config.lr
         # Width of the game board
-        self.board_w = board_w
+        self.board_w = config.board_width
         # Height of the game board
-        self.board_h = board_h
+        self.board_h = config.board_height
         # Number of actions: birth (0), death (1), or pass (2)
-        self.n_actions = 3
+        self.n_actions = config.n_actions
         # Number of epochs to train
-        self.epochs = 20
+        self.epochs = config.epochs
         # Number of steps in each training batch (i.e. number of steps to take before updating network)
-        self.batch_size = 1000
+        self.batch_size = config.batch_size
         # Max episode length (must be less than self.batch_size) - set to 100 (max length of a game of GOLAD)
-        self.max_ep_length = 100
+        self.max_ep_length = config.max_ep_length
         # Tensorflow session for training
         self.sess = tf.Session()
         # Directory to save/restore trained weights
         self.save_path = 'weights/'
         # How often to save weights
-        self.save_freq = 100
+        self.save_freq = config.save_freq
 
     def setup(self):
         self.add_placeholders()
