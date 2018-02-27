@@ -121,6 +121,8 @@ class GOLADState(GameState):
             self.terminal = 1
         elif (len(cells_0) <= 0) and (len(cells_1) > 0):
             self.terminal = 2
+        elif (len(cells_0) <= 0) and (len(cells_1) <= 0):
+            self.terminal = 3
         elif self.timestep >= self.max_timestep:
             self.terminal = 3
 
