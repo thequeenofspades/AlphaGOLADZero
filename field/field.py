@@ -60,5 +60,6 @@ class Field:
         for j in xrange(self.height):
             line = ""
             for i in xrange(self.width):
-                line = line + self.cells[i][j]
+                line = line + self.cells[i][j] + ' '
             print (line)
+        print 

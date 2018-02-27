@@ -188,10 +188,12 @@ def UCTPlayGame(nn):
         m, pi = UCT(rootstate = state, itermax = config.mcts_itermax, nn=nn, verbose = False)
         data['s'].append(state.Convert())
         data['pi'].append(pi)
+        print('Current player: {}'.format(state.current_player))
         print "Best Move: " + str(m) + "\n"
         state.field.pprint()
         state.DoMove(m)
 
+    print('Result: {}'.format(state.GetResult(0)))
     data['z'] = [[state.GetResult(0)]] * len(data['s']) # get result from perspective of first player (ie rootnode)
     
     return data

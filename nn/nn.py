@@ -12,9 +12,9 @@ class NN():
         self.board_h = config.board_height
         # Number of actions: birth (0), death (1), or pass (2)
         self.n_actions = config.n_actions
-        # Number of epochs to train
-        self.epochs = config.epochs
-        # Number of steps in each training batch (i.e. number of steps to take before updating network)
+        # Number of steps to train
+        self.train_steps = config.train_steps
+        # Number of examples in each training batch (i.e. number of steps to take before updating network)
         self.batch_size = config.batch_size
         # Max episode length (must be less than self.batch_size) - set to 100 (max length of a game of GOLAD)
         self.max_ep_length = config.max_ep_length
@@ -46,7 +46,7 @@ class NN():
             self.sess.run(init)
 
     def save_weights(self):
-        saver.save(self.sess, self.save_path + 'model.ckpt')
+        self.saver.save(self.sess, self.save_path + 'model.ckpt')
 
     def add_placeholders(self):
         # State features for each time step in batch
@@ -106,16 +106,18 @@ class NN():
         probs, v = self.sess.run((self.probs, self.v), feed_dict={self.state_placeholder: states})
         return probs, v
 
-    def train(self, batch_sample):
-        states, mcts_probs, z = batch_sample
-        for epoch in range(self.epochs):
+    def train(self, data):
+        states, mcts_probs, z = (np.array(x) for x in data)
+        assert len(states) == len(mcts_probs) == len(z)
+        for step in range(self.train_steps):
+            idx = np.random.choice(range(len(states)), self.batch_size, replace=False)
             loss, _ = self.sess.run((self.loss, self.train_op), feed_dict={
-                self.state_placeholder: states,
-                self.z: z,
-                self.mcts_probs: mcts_probs
+                self.state_placeholder: states[idx],
+                self.z: z[idx],
+                self.mcts_probs: mcts_probs[idx]
                 })
-            print "Loss for epoch %d: %.3f" % (epoch+1, loss)
-            if (epoch + 1) % self.save_freq == 0:
+            print "Loss for step %d: %.3f" % (step+1, loss)
+            if (step + 1) % self.save_freq == 0:
                 self.save_weights()
             
     def coords_to_idx(self, x, y, major='col'):

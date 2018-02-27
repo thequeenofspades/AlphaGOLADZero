@@ -9,16 +9,20 @@ if __name__ == "__main__":
     nn = NN(config)
     nn.setup()
     
-    n_iters = 10
-    for _ in range(n_iters):
-        batch_data = {}
-        batch_data['s'], batch_data['pi'], batch_data['z'] = ([], [], [])
-        while len(batch_data['s']) < config.batch_size:
+    batch_data = {}
+    batch_data['s'], batch_data['pi'], batch_data['z'] = ([], [], [])
+
+    for _ in range(config.n_iters):
+        
+        # Collect self-play data from MCTS
+        while len(batch_data['s']) < config.buffer_size:
             if config.verbose:
                 print('Current data size: {}'.format(len(batch_data['s'])))
             data = UCTPlayGame(nn)
             for k in batch_data.keys():
                 batch_data[k].extend(data[k])
         
-        batch_sample = (batch_data['s'][:config.batch_size], batch_data['pi'][:config.batch_size], batch_data['z'][:config.batch_size])
-        nn.train(batch_sample)
+        nn.train((batch_data['s'], batch_data['pi'], batch_data['z']))
+        
+        for k in batch_data.keys():
+            batch_data[k] = batch_data[k][config.batch_size:]

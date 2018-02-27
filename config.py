@@ -12,8 +12,12 @@ class config():
 
     # NN params
     lr = 0.01
-    batch_size = 8
+    batch_size = 16
     n_actions = 3
-    epochs = 20
+    train_steps = 1000
     max_ep_length = 100
-    save_freq = 100
+    save_freq = 1001
+    
+    # Outer loop params
+    n_iters = 10
+    buffer_size = 50
