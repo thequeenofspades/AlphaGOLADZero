@@ -100,12 +100,13 @@ def extract_p_move(p, m, all_ms, nn):
         assert False
     
 
-def UCT(rootstate, itermax, nn, verbose = False):
+def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
     """ Conduct a UCT search for itermax iterations starting from rootstate.
         Return the best move from the rootstate.
         Assumes 2 alternating players (player 0 starts), with game rewards {-1, +1}."""
 
-    rootnode = Node(player=0, state=rootstate)
+    if rootnode is None:
+        rootnode = Node(player=0, state=rootstate)
 
     for i in range(itermax):
         node = rootnode
@@ -154,7 +155,7 @@ def UCT(rootstate, itermax, nn, verbose = False):
             assert move_tuple[0] == MoveType.PASS
             pi_t[-1] = pi[i]
     
-    return np.random.choice(rootnode.childNodes, p=pi).move, pi_t # return move sampled from pi and pi_t
+    return np.random.choice(rootnode.childNodes, p=pi), pi_t # return child node sampled from pi and pi_t
 
 def init_cells(width = 18, height = 16, cells_each_player = 50):
     assert width & 1 == 0
@@ -184,8 +185,10 @@ def UCTPlayGame(nn):
     data = {}
     data['s'] = []
     data['pi'] = []
+    c = None
     while (state.GetMoves() != []):
-        m, pi = UCT(rootstate = state, itermax = config.mcts_itermax, nn=nn, verbose = False)
+        c, pi= UCT(rootstate = state, itermax = config.mcts_itermax, nn=nn, verbose = False, rootnode = c)
+        m = c.move
         data['s'].append(state.Convert())
         data['pi'].append(pi)
         print('Current player: {}'.format(state.current_player))
