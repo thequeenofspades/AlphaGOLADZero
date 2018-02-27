@@ -192,7 +192,7 @@ def UCTPlayGame(nn):
         state.field.pprint()
         state.DoMove(m)
 
-    data['z'] = [state.GetResult(0)] * len(data['s']) # get result from perspective of first player (ie rootnode)
+    data['z'] = [[state.GetResult(0)]] * len(data['s']) # get result from perspective of first player (ie rootnode)
     
     return data
 #     

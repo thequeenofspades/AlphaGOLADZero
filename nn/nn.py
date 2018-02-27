@@ -52,7 +52,7 @@ class NN():
         # State features for each time step in batch
         self.state_placeholder = tf.placeholder(tf.float32, (None, self.board_w, self.board_h, 3))
         # Self-play winner z
-        self.z = tf.placeholder(tf.float32, (None,))
+        self.z = tf.placeholder(tf.float32, (None, 1))
         # Action probability distribution over grid output by MCTS - kill/birth at each location or pass
         self.mcts_probs = tf.placeholder(tf.float32, (None, self.board_w*self.board_h + 1))
 
@@ -93,6 +93,7 @@ class NN():
         # Minimize error between network predictions and MCTS predictions
         self.loss = tf.square(self.z - self.v)
         self.loss = self.loss - tf.losses.log_loss(labels=self.mcts_probs, predictions=self.probs)
+        self.loss = tf.reduce_mean(self.loss)
 
     def add_train_op(self, scope='Q_scope'):
         # Minimize training loss

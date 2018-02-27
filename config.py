@@ -1,4 +1,5 @@
 class config():
+    verbose = False
     # Number of iterations for MCTS
     mcts_itermax = 10
 
@@ -11,7 +12,7 @@ class config():
 
     # NN params
     lr = 0.01
-    batch_size = 1000
+    batch_size = 8
     n_actions = 3
     epochs = 20
     max_ep_length = 100
