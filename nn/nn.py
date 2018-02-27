@@ -20,6 +20,10 @@ class NN():
         self.max_ep_length = 100
         # Tensorflow session for training
         self.sess = tf.Session()
+        # Directory to save/restore trained weights
+        self.save_path = 'weights/'
+        # How often to save weights
+        self.save_freq = 100
 
     def setup(self):
         self.add_placeholders()
@@ -32,9 +36,17 @@ class NN():
 
         self.add_train_op('Q_scope')
 
-        # Initialize all variables
-        init = tf.global_variables_initializer()
-        self.sess.run(init)
+        # Initialize all variables or restore from saved checkpoint
+        self.saver = tf.train.Saver()
+        ckpt = tf.train.get_checkpoint_state(self.save_path)
+        if ckpt and ckpt.model_checkpoint_path:
+            self.saver.restore(self.sess, ckpt.model_checkpoint_path)
+        else:
+            init = tf.global_variables_initializer()
+            self.sess.run(init)
+
+    def save_weights(self):
+        saver.save(self.sess, self.save_path + 'model.ckpt')
 
     def add_placeholders(self):
         # State features for each time step in batch
@@ -102,6 +114,8 @@ class NN():
                 self.mcts_probs: mcts_probs
                 })
             print "Loss for epoch %d: %.3f" % (epoch+1, loss)
+            if (epoch + 1) % self.save_freq == 0:
+                self.save_weights()
             
     def coords_to_idx(self, x, y, major='col'):
         if major == 'col':
