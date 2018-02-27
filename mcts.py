@@ -108,7 +108,6 @@ def UCT(rootstate, itermax, nn, verbose = False):
     rootnode = Node(player=0, state=rootstate)
 
     for i in range(itermax):
-        #print "Iteration %d" % i
         node = rootnode
         state = rootstate.Clone()
 
@@ -121,8 +120,8 @@ def UCT(rootstate, itermax, nn, verbose = False):
         # p, v = state.GetP(), state.GetV() # get outputs from NN
         p, v = nn.evaluate(state.Convert()) # get outputs from NN
         all_ms = node.untriedMoves
-        #print "%d moves" % len(all_ms)
-        for m in node.untriedMoves: # replace with while?
+        while node.untriedMoves != []: # replace with while?
+            m = node.untriedMoves[0]
             temp_state = state.Clone()
             temp_state.DoMove(m)
             # compute p_move from p
@@ -138,19 +137,19 @@ def UCT(rootstate, itermax, nn, verbose = False):
             node = node.parentNode
 
     # Output some information about the tree - can be omitted
-    if (verbose): print rootnode.TreeToString(0)
-    else: print rootnode.ChildrenToString()
+    # if (verbose): print rootnode.TreeToString(0)
+    # else: print rootnode.ChildrenToString()
 
     # Select move to play using exponentiated visit count
     tau = 1.
-    exp_visits = np.array([np.pow(c.total_visits, 1./tau) for c in rootnode.childNodes])
+    exp_visits = np.array([np.power(c.total_visits, 1./tau) for c in rootnode.childNodes])
     pi = exp_visits / np.sum(exp_visits)
     
     pi_t = np.zeros((nn.board_w * nn.board_h + 1))
     move_tuples = [(c.move.move_type, c.move.target_point, c.move.sacrifice_points) for c in rootnode.childNodes]
     for i, move_tuple in enumerate(move_tuples):
         if move_tuple[1] is not None:
-            pi_t[nn.coords_to_idx(move_tuple[1][0], move_tuple[1][1])] = pi[i] # TODO: check dtype of move.target_point
+            pi_t[nn.coords_to_idx(move_tuple[1].x, move_tuple[1].y)] = pi[i] # TODO: check dtype of move.target_point
         else: # pass
             assert move_tuple[0] == MoveType.PASS
             pi_t[-1] = pi[i]
