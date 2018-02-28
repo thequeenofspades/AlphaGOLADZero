@@ -127,6 +127,10 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
             temp_state.DoMove(m)
             # compute p_move from p
             p_move = extract_p_move(p, m, all_ms, nn)
+            # add Dirichlet noise if rootnode
+            if node == rootnode:
+                eps = 0.25
+                p_move = (1 - eps) * p_move + eps * np.random.dirichlet(0.03)
             node.AddChild(m, temp_state, p_move)
 
         # Backpropagate
