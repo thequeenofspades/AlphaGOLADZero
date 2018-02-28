@@ -168,7 +168,7 @@ def init_cells(width = 18, height = 16, cells_each_player = 50):
     cells_str = ''.join((cell + ",") for cell in cells)[:-1]
     return cells_str
     
-def UCTPlayGame(nn):
+def UCTPlayGame(nn, nn2=None):
     """ Self-play using MCTS, returns s_t's, pi_t's, and z to use for training.
     """
     width = config.board_width
@@ -185,8 +185,9 @@ def UCTPlayGame(nn):
     data['s'] = []
     data['pi'] = []
     c = None
+    current_nn = nn # use nn for first player
     while (state.GetMoves() != []):
-        c, pi= UCT(rootstate = state, itermax = config.mcts_itermax, nn=nn, verbose = False, rootnode = c)
+        c, pi= UCT(rootstate = state, itermax = config.mcts_itermax, nn=current_nn, verbose = False, rootnode = c)
         m = c.move
         data['s'].append(state.Convert())
         data['pi'].append(pi)
@@ -194,6 +195,11 @@ def UCTPlayGame(nn):
             .format(state.timestep, state.current_player, str(m)))
         state.field.pprint()
         state.DoMove(m)
+        if nn2 is not None:
+            if current_nn == nn:
+                current_nn = nn2
+            else:
+                current_nn = nn
 
     print('Result: {}'.format(state.GetResult(0)))
     data['z'] = [[state.GetResult(0)]] * len(data['s']) # get result from perspective of first player (ie rootnode)
