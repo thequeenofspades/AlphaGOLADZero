@@ -21,9 +21,11 @@ class NN():
         # Tensorflow session for training
         self.sess = tf.Session()
         # Directory to save/restore trained weights
-        self.save_path = 'weights/'
+        self.save_path = config.save_path
         # How often to save weights
         self.save_freq = config.save_freq
+        # Internal count of train steps
+        self._steps = 0
 
     def setup(self):
         self.add_placeholders()
@@ -46,7 +48,7 @@ class NN():
             self.sess.run(init)
 
     def save_weights(self):
-        self.saver.save(self.sess, self.save_path + 'model.ckpt')
+        self.saver.save(self.sess, self.save_path + 'model_step_{}.ckpt'.format(self._steps))
 
     def add_placeholders(self):
         # State features for each time step in batch
@@ -119,6 +121,7 @@ class NN():
             print "Loss for step %d: %.3f" % (step+1, loss)
             if (step + 1) % self.save_freq == 0:
                 self.save_weights()
+            self._steps += 1
             
     def coords_to_idx(self, x, y, major='col'):
         if major == 'col':

@@ -17,6 +17,7 @@ class config():
     train_steps = 1000
     max_ep_length = 100
     save_freq = 1001
+    save_path = 'weights/'
     
     # Outer loop params
     n_iters = 10
