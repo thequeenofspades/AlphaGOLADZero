@@ -130,7 +130,7 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
             # add Dirichlet noise if rootnode
             if node == rootnode:
                 eps = 0.25
-                p_move = (1 - eps) * p_move + eps * np.random.dirichlet(0.03)
+                p_move = (1 - eps) * p_move + eps * np.random.dirichlet([0.03])
             node.AddChild(m, temp_state, p_move)
 
         # Backpropagate
