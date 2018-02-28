@@ -164,8 +164,7 @@ def init_cells(width = 18, height = 16, cells_each_player = 50):
     cells = ["." for _ in xrange(width * height)]
     for idx in random.sample(range(width * height / 2), cells_each_player):
         cells[idx] = "0"
-    for idx in random.sample(range(width * height / 2, width * height), cells_each_player):
-        cells[idx] = "1"
+        cells[width * height - idx - 1] = "1"
     cells_str = ''.join((cell + ",") for cell in cells)[:-1]
     return cells_str
     
