@@ -108,7 +108,9 @@ class GOLADState(GameState):
                 new_field.cells[cell.x][cell.y] = '0' if count[1]>count[2] else '1'
 
         self.field = new_field
-        self.timestep += 1
+        # Only increment timestep counter after Player1's turn
+        if self.current_player == 1:
+            self.timestep += 1
 
         # Flip turn player
         self.current_player = 1 - self.current_player

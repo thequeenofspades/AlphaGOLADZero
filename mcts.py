@@ -191,8 +191,8 @@ def UCTPlayGame(nn):
         m = c.move
         data['s'].append(state.Convert())
         data['pi'].append(pi)
-        print('Current player: {}'.format(state.current_player))
-        print "Best Move: " + str(m) + "\n"
+        print ("\nTurn {}, Player {}, Best Move: {}" \
+            .format(state.timestep, state.current_player, str(m)))
         state.field.pprint()
         state.DoMove(m)
 
