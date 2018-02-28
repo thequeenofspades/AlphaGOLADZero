@@ -200,9 +200,9 @@ class GOLADState(GameState):
         if (len(my_cells) > 0) and (len(opp_cells) <= 0):
             return 1.0
         elif (len(my_cells) <= 0) and (len(opp_cells) > 0):
-            return 0.0
+            return -1.0
         else:
-            return 0.5
+            return 0.
 
 #         jmcount = len([(x,y) for x in range(self.size) for y in range(self.size) if self.board[x][y] == playerjm])
 #         notjmcount = len([(x,y) for x in range(self.size) for y in range(self.size) if self.board[x][y] == 3 - playerjm])

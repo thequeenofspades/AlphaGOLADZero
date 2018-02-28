@@ -25,4 +25,4 @@ if __name__ == "__main__":
         nn.train((batch_data['s'], batch_data['pi'], batch_data['z']))
         
         for k in batch_data.keys():
-            batch_data[k] = batch_data[k][config.batch_size:]
+            batch_data[k] = batch_data[k][int(0.25*config.buffer_size):]
