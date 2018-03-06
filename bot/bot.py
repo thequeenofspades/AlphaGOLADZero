@@ -1,4 +1,5 @@
 import random
+from sys import stderr
 
 from move.move import Move
 from move.move_type import MoveType
@@ -6,10 +7,13 @@ from move.move_type import MoveType
 from game_state import GOLADState
 from mcts import UCT
 
+from config import config
+
 class Bot:
 
-    def __init__(self):
+    def __init__(self, nn):
         random.seed()  # set seed here if needed
+        self.nn = nn
 
     def get_action(self, game):
         cell_map = game.field.get_cell_mapping()
@@ -33,8 +37,12 @@ class Bot:
         Performs a Birth or a Kill move, currently returns a random move.
         Implement this method to make the bot smarter.
         """
+        
         state = GOLADState(field=game.field)
-        m = UCT(state, itermax = 5)
+        state.current_player = int(game.me.id)
+        c, pi= UCT(rootstate = state, itermax = config.mcts_itermax, nn=self.nn, verbose = False)
+
+        return c.move
 
         # cell_map = game.field.get_cell_mapping()
 
@@ -43,13 +51,13 @@ class Bot:
 
         # return self.make_random_kill_move(game, cell_map)
 
-        action, cells = self.get_action(game)
-        if action == 0:
-            return Move(MoveType.KILL, cells[0])
-        elif action == 1:
-            return Move(MoveType.BIRTH, cells[1], cells[2:])
-        else:
-            return Move(MoveType.PASS)
+#         action, cells = self.get_action(game)
+#         if action == 0:
+#             return Move(MoveType.KILL, cells[0])
+#         elif action == 1:
+#             return Move(MoveType.BIRTH, cells[1], cells[2:])
+#         else:
+#             return Move(MoveType.PASS)
 
     def make_random_birth_move(self, game, cell_map):
         dead_cells = cell_map.get('.', [])

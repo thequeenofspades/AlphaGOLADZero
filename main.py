@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 
+from config import config
+from nn.nn import NN
+
 """
 Copyright 2017 riddles.io (developers@riddles.io)
 
@@ -23,7 +26,10 @@ from bot.game import Game
 from bot.bot import Bot
 
 def main():
-    bot = Bot()
+    nn = NN(config)
+    nn.setup()
+    bot = Bot(nn)
+#     bot = Bot()
     game = Game()
     game.run(bot)
 
