@@ -26,17 +26,19 @@ class NN():
         self.save_freq = config.save_freq
         # Internal count of train steps
         self._steps = 0
+        # How many residual blocks in the residual tower
+        self.res_tower_height = 19
 
     def setup(self):
         self.add_placeholders()
 
         # Compute Q values and grid probabilities for current state
-        self.get_q_values_op('Q_scope')
+        self.alpha_go_zero_network('scope')
 
         # Minimize difference between network and MCTS outputs
         self.add_loss()
 
-        self.add_train_op('Q_scope')
+        self.add_train_op('scope')
 
         # Initialize all variables or restore from saved checkpoint
         self.saver = tf.train.Saver()
@@ -57,39 +59,101 @@ class NN():
         self.z = tf.placeholder(tf.float32, (None, 1))
         # Action probability distribution over grid output by MCTS - kill/birth at each location or pass
         self.mcts_probs = tf.placeholder(tf.float32, (None, self.board_w*self.board_h + 1))
+        # Records whether we are training or evaluating
+        self.training_placeholder = tf.placeholder(tf.bool, ())
 
-    def get_q_values_op(self, scope='Q_scope'):
-        # Right now this is just a single conv layer + max pool + fully connected layer for each output.
-        # We can add convolutional layers and change up the network architecture once this is working.
-        # Also need to add L2 regularization to match AlphaGoZero nature paper
+    def conv_block(self, X, is_training, scope='scope'):
+        conv = tf.contrib.layers.conv2d(
+            X,
+            256,
+            3,
+            stride=1,
+            scope=scope+'/conv')
+        norm = tf.contrib.layers.batch_norm(
+            conv,
+            is_training=is_training,
+            scope=scope+'/norm')
+        relu = tf.nn.relu(norm)
+        return relu
 
-        # Single conv2d layer
+    def residual_block(self, X, index, is_training, scope='scope'):
         conv1 = tf.contrib.layers.conv2d(
-            self.state_placeholder,
-            16,
-            7,
-            scope=scope+'/conv1'
-            )
-
-        # Single max pooling layer
-        pool1 = tf.contrib.layers.max_pool2d(
+            X,
+            256,
+            3,
+            stride=1,
+            scope=scope+'/res_conv1_'+str(index))
+        norm1 = tf.contrib.layers.batch_norm(
             conv1,
-            2,
-            scope=scope+'/pool1')
+            is_training=is_training,
+            scope=scope+'/res_norm1_'+str(index))
+        relu1 = tf.nn.relu(norm1)
+        conv2 = tf.contrib.layers.conv2d(
+            relu1,
+            256,
+            3,
+            stride=1,
+            scope=scope+'/res_conv2_'+str(index))
+        norm2 = tf.contrib.layers.batch_norm(
+            conv2,
+            is_training=is_training,
+            scope=scope+'/res_norm2_'+str(index))
+        skip = conv1 + X
+        relu2 = tf.nn.relu(skip)
+        return relu2
 
-        # Outputs the move probability distribution over the grid
-        self.probs = tf.contrib.layers.fully_connected(
-            tf.contrib.layers.flatten(pool1),
+    def policy_head(self, X, is_training, scope='scope'):
+        conv = tf.contrib.layers.conv2d(
+            X,
+            2,
+            1,
+            stride=1,
+            scope=scope+'/policy_head_conv')
+        norm = tf.contrib.layers.batch_norm(
+            conv,
+            is_training=is_training,
+            scope=scope+'/policy_head_norm')
+        relu = tf.nn.relu(norm)
+        output = tf.contrib.layers.fully_connected(
+            tf.contrib.layers.flatten(relu),
             self.board_w * self.board_h + 1,
             activation_fn=tf.nn.softmax,
-            scope=scope+'/probs')
+            scope=scope+'/policy_head_output')
+        return output
 
-        # Outputs the predicted winner v
-        self.v = tf.contrib.layers.fully_connected(
-            tf.contrib.layers.flatten(pool1),
+    def value_head(self, X, is_training, scope='scope'):
+        conv = tf.contrib.layers.conv2d(
+            X,
+            1,
+            1,
+            stride=1,
+            scope=scope+'/value_head_conv')
+        norm = tf.contrib.layers.batch_norm(
+            conv,
+            is_training=is_training,
+            scope=scope+'/value_head_norm')
+        relu = tf.nn.relu(norm)
+        hidden = tf.contrib.layers.fully_connected(
+            tf.contrib.layers.flatten(relu),
+            256,
+            activation_fn=tf.nn.relu,
+            scope=scope+'/value_head_hidden')
+        output = tf.contrib.layers.fully_connected(
+            hidden,
             1,
             activation_fn=tf.nn.tanh,
-            scope=scope+'/v')
+            scope=scope+'/value_head/output')
+        return output
+
+    def alpha_go_zero_network(self, scope='scope'):
+        # Duplicates the architecture from the AlphaGoZero nature paper
+        convolutional_block = self.conv_block(self.state_placeholder, self.training_placeholder, scope)
+        res_tower = [convolutional_block]
+        for i in range(1, self.res_tower_height):
+            res_block = self.residual_block(res_tower[i - 1], i, self.training_placeholder, scope)
+            res_tower.append(res_block)
+        self.probs = self.policy_head(res_tower[-1], self.training_placeholder, scope)
+        self.v = self.value_head(res_tower[-1], self.training_placeholder, scope)
 
     def add_loss(self):
         # Minimize error between network predictions and MCTS predictions
@@ -105,7 +169,10 @@ class NN():
     def evaluate(self, states):
         if len(states.shape) == 3:
             states = np.expand_dims(states, axis=0) # add batch dimension
-        probs, v = self.sess.run((self.probs, self.v), feed_dict={self.state_placeholder: states})
+        probs, v = self.sess.run((self.probs, self.v), feed_dict={
+            self.state_placeholder: states,
+            self.training_placeholder: False
+            })
         return probs, v
 
     def train(self, data):
@@ -116,7 +183,8 @@ class NN():
             loss, _ = self.sess.run((self.loss, self.train_op), feed_dict={
                 self.state_placeholder: states[idx],
                 self.z: z[idx],
-                self.mcts_probs: mcts_probs[idx]
+                self.mcts_probs: mcts_probs[idx],
+                self.training_placeholder: True
                 })
             print "Loss for step %d: %.3f" % (step+1, loss)
             if (step + 1) % self.save_freq == 0:
