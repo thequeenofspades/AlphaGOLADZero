@@ -1,0 +1,38 @@
+{
+  "wrapper": {
+    "timebankMax": 30000,
+    "timePerMove": 30000,
+    "maxTimeouts": 0,
+    "resultFile": "./resultfile.json",
+    "propagateBotExitCode": false,
+    "debug": true,
+    "suppressEngineIO": true
+  },
+  "match": {
+    "bots": [
+      {
+        "command": "python ../main.py"
+      },
+      {
+        "command": "python ../main.py"
+      }
+    ],
+    "engine": {
+      "command": "java -jar /Users/Jerry/Documents/Stanford/Winter2018/CS234/Project/golad-engine/build/libs/Golad-1.1.1.jar",
+      "configuration": {
+        "fieldWidth": {
+          "type": "integer",
+          "value": 6
+        },
+        "fieldHeight": {
+          "type": "integer",
+          "value": 6
+        },
+        "initialCellsPerPlayer": {
+          "type": "integer",
+          "value": 10
+        }
+      }
+    }
+  }
+}
