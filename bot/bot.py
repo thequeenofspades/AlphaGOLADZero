@@ -10,10 +10,40 @@ from mcts import UCT
 from config import config
 
 class Bot:
+    """
+    Base class for bots
+    """        
+    def __init__(self):
+        random.seed()  # set seed here if needed
+
+    def make_move(self, game):
+        """
+        Given a Game object, return a Move object
+        """
+        return Move(MoveType.PASS)
+
+class MctsBot(Bot):
 
     def __init__(self, nn):
         random.seed()  # set seed here if needed
         self.nn = nn
+        
+    def make_move(self, game):
+        """
+        Performs a Birth or a Kill move, currently returns a random move.
+        Implement this method to make the bot smarter.
+        """
+        
+        state = GOLADState(field=game.field)
+        state.current_player = int(game.me.id)
+        c, pi= UCT(rootstate = state, itermax = config.mcts_itermax, nn=self.nn, verbose = False)
+
+        return c.move
+
+class RandomBot(Bot):
+
+    def __init__(self):
+        random.seed()  # set seed here if needed
 
     def get_action(self, game):
         cell_map = game.field.get_cell_mapping()
@@ -37,19 +67,13 @@ class Bot:
         Performs a Birth or a Kill move, currently returns a random move.
         Implement this method to make the bot smarter.
         """
-        
-        state = GOLADState(field=game.field)
-        state.current_player = int(game.me.id)
-        c, pi= UCT(rootstate = state, itermax = config.mcts_itermax, nn=self.nn, verbose = False)
 
-        return c.move
+        cell_map = game.field.get_cell_mapping()
 
-        # cell_map = game.field.get_cell_mapping()
+        if random.random() < 0.5:
+            return self.make_random_birth_move(game, cell_map)
 
-        # if random.random() < 0.5:
-        #     return self.make_random_birth_move(game, cell_map)
-
-        # return self.make_random_kill_move(game, cell_map)
+        return self.make_random_kill_move(game, cell_map)
 
 #         action, cells = self.get_action(game)
 #         if action == 0:

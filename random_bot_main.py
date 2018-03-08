@@ -23,13 +23,10 @@ Copyright 2017 riddles.io (developers@riddles.io)
 """
 
 from bot.game import Game
-from bot.bot import Bot
+from bot.bot import Bot, RandomBot
 
 def main():
-    nn = NN(config)
-    nn.setup()
-    bot = Bot(nn)
-#     bot = Bot()
+    bot = RandomBot()
     game = Game()
     game.run(bot)
 

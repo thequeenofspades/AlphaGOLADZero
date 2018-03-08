@@ -11,10 +11,10 @@
   "match": {
     "bots": [
       {
-        "command": "python ../main.py"
+        "command": "python ../mcts_bot_main.py"
       },
       {
-        "command": "python ../main.py"
+        "command": "python ../random_bot_main.py"
       }
     ],
     "engine": {
