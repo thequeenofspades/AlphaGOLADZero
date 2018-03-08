@@ -12,7 +12,7 @@ if __name__ == "__main__":
     batch_data = {}
     batch_data['s'], batch_data['pi'], batch_data['z'] = ([], [], [])
 
-    for _ in range(config.n_iters):
+    for iteration in range(config.n_iters):
         
         # Collect self-play data from MCTS
         while len(batch_data['s']) < config.buffer_size:
@@ -21,8 +21,12 @@ if __name__ == "__main__":
             data = UCTPlayGame(nn)
             for k in batch_data.keys():
                 batch_data[k].extend(data[k])
+
+        print "Finished collecting self-play data from iteration %d" % iteration
         
         nn.train((batch_data['s'], batch_data['pi'], batch_data['z']))
+
+        print "Finished training on self-play data from iteration %d" % iteration
         
         for k in batch_data.keys():
             batch_data[k] = batch_data[k][int(0.25*config.buffer_size):]
