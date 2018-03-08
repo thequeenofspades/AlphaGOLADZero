@@ -18,7 +18,7 @@
       }
     ],
     "engine": {
-      "command": "java -jar /Users/Jerry/Documents/Stanford/Winter2018/CS234/Project/golad-engine/build/libs/Golad-1.1.1.jar",
+      "command": "java -jar ../../golad-engine/build/libs/Golad-1.1.1.jar",
       "configuration": {
         "fieldWidth": {
           "type": "integer",
