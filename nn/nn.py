@@ -28,7 +28,7 @@ class NN():
         # Internal count of train steps
         self._steps = 0
         # How many residual blocks in the residual tower
-        self.res_tower_height = 19
+        self.res_tower_height = config.res_tower_height
 
     def setup(self):
         self.add_placeholders()

@@ -18,6 +18,7 @@ class config():
     max_ep_length = 100
     save_freq = 1001
     save_path = 'weights/'
+    res_tower_height = 19
     
     # Outer loop params
     n_iters = 10
