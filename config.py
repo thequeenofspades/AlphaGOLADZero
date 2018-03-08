@@ -16,7 +16,7 @@ class config():
     n_actions = 3
     train_steps = 1000
     max_ep_length = 100
-    save_freq = 1001
+    save_freq = 1000
     save_path = 'weights/'
     res_tower_height = 19
     
