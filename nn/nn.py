@@ -4,6 +4,7 @@ import random
 
 class NN():
     def __init__(self, config):
+        self.config = config
         # Learning rate for the AdamOptimizer
         self.lr = config.lr
         # Width of the game board
@@ -186,8 +187,10 @@ class NN():
                 self.mcts_probs: mcts_probs[idx],
                 self.training_placeholder: True
                 })
-            print "Loss for step %d: %.3f" % (step+1, loss)
+            if self.config.verbose:
+                print "Loss for step %d: %.3f" % (step+1, loss)
             if (step + 1) % self.save_freq == 0:
+                print "Saved weights after %d steps" % (step+1)
                 self.save_weights()
             self._steps += 1
             

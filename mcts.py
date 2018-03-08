@@ -195,9 +195,10 @@ def UCTPlayGame(nn, nn2=None):
         m = c.move
         data['s'].append(state.Convert())
         data['pi'].append(pi)
-        print ("\nTurn {}, Player {}, Best Move: {}" \
-            .format(state.timestep, state.current_player, str(m)))
-        state.field.pprint()
+        if config.verbose:
+            print ("\nTurn {}, Player {}, Best Move: {}" \
+                .format(state.timestep, state.current_player, str(m)))
+            state.field.pprint()
         state.DoMove(m)
         if nn2 is not None:
             if current_nn == nn:
@@ -205,7 +206,8 @@ def UCTPlayGame(nn, nn2=None):
             else:
                 current_nn = nn
 
-    print('Result: {}'.format(state.GetResult(0)))
+    if config.verbose:
+        print('Result: {}'.format(state.GetResult(0)))
     data['z'] = [[state.GetResult(0)]] * len(data['s']) # get result from perspective of first player (ie rootnode)
     
     return data
