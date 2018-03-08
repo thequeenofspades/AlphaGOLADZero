@@ -46,6 +46,7 @@ class NN():
         ckpt = tf.train.get_checkpoint_state(self.save_path)
         if ckpt and ckpt.model_checkpoint_path:
             self.saver.restore(self.sess, ckpt.model_checkpoint_path)
+            print "Restored weights from checkpoint"
         else:
             init = tf.global_variables_initializer()
             self.sess.run(init)

@@ -21,5 +21,5 @@ class config():
     res_tower_height = 19
     
     # Outer loop params
-    n_iters = 10
+    n_iters = 100
     buffer_size = 50
