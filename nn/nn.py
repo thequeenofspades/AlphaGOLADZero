@@ -180,6 +180,7 @@ class NN():
     def train(self, data):
         states, mcts_probs, z = (np.array(x) for x in data)
         assert len(states) == len(mcts_probs) == len(z)
+        avg_loss = 0.0
         for step in range(self.train_steps):
             idx = np.random.choice(range(len(states)), self.batch_size, replace=False)
             loss, _ = self.sess.run((self.loss, self.train_op), feed_dict={
@@ -188,12 +189,14 @@ class NN():
                 self.mcts_probs: mcts_probs[idx],
                 self.training_placeholder: True
                 })
+            avg_loss += loss
             if self.config.verbose:
                 print "Loss for step %d: %.3f" % (step+1, loss)
             if (step + 1) % self.save_freq == 0:
                 print "Saved weights after %d steps" % (step+1)
                 self.save_weights()
             self._steps += 1
+        print "Average loss: %f" % (avg_loss / float(self.train_steps))
             
     def coords_to_idx(self, x, y, major='col'):
         if major == 'col':
