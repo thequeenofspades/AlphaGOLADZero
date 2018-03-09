@@ -7,6 +7,8 @@ from move.move_type import MoveType
 
 import numpy as np
 
+from config import config
+
 class GameState:
     """ A state of the game, i.e. the game board. These are the only functions which are
         absolutely necessary to implement UCT in any 2-player complete information deterministic 
@@ -53,7 +55,7 @@ class GOLADState(GameState):
         self.timestep = 0
         self.terminal = 0 # 0 (not done), 1 (player0 wins), 2 (player1 wins), 3 (tie)
         self.field = field
-        self.max_timestep = 100
+        self.max_timestep = config.max_ep_length
 
     def Clone(self):
         """ Create a deep clone of this game state.
