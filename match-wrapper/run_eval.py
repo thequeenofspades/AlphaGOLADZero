@@ -18,6 +18,7 @@ def run_eval(num_matches):
             jsonobj = json.load(in_file)
             jsonobj_details = json.loads(jsonobj["details"])
             winner = jsonobj_details["winner"]
+            print ("Result of Game #" + str(i) + ": " + winner)
             if winner not in game_results:
                 game_results[winner] = 1
             else:
