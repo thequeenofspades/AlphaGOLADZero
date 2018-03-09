@@ -25,6 +25,8 @@ class NN():
         self.save_path = config.save_path
         # How often to save weights
         self.save_freq = config.save_freq
+        # How often to print out the average loss
+        self.print_freq = config.print_freq
         # Internal count of train steps
         self._steps = 0
         # How many residual blocks in the residual tower
@@ -191,11 +193,12 @@ class NN():
                 self.training_placeholder: True
                 })
             avg_loss += loss
+            if (step + 1) % self.print_freq == 0 and self.config.verbose:
+                print "Average loss after %d steps: %f" % (step+1, avg_loss / float(step))
             if (step + 1) % self.save_freq == 0:
                 print "Saved weights after %d steps" % (step+1)
                 self.save_weights()
             self._steps += 1
-        print "Average loss: %f" % (avg_loss / float(self.train_steps))
             
     def coords_to_idx(self, x, y, major='col'):
         if major == 'col':
