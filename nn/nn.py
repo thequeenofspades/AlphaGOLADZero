@@ -160,7 +160,8 @@ class NN():
     def add_loss(self):
         # Minimize error between network predictions and MCTS predictions
         self.loss = tf.square(self.z - self.v)
-        self.loss = self.loss - tf.losses.log_loss(labels=self.mcts_probs, predictions=self.probs)
+	self.loss = self.loss - tf.reduce_sum(tf.multiply(self.mcts_probs, tf.log(self.probs)), 1)
+        #self.loss = self.loss - tf.losses.log_loss(labels=self.mcts_probs, predictions=self.probs)
         self.loss = tf.reduce_mean(self.loss)
 
     def add_train_op(self, scope='Q_scope'):
