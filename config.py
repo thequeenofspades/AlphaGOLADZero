@@ -1,5 +1,5 @@
 class config():
-    verbose = False
+    verbose = True
     # Number of iterations for MCTS
     mcts_itermax = 10
 

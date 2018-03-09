@@ -190,8 +190,6 @@ class NN():
                 self.training_placeholder: True
                 })
             avg_loss += loss
-            if self.config.verbose:
-                print "Loss for step %d: %.3f" % (step+1, loss)
             if (step + 1) % self.save_freq == 0:
                 print "Saved weights after %d steps" % (step+1)
                 self.save_weights()
