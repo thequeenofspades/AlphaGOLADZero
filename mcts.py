@@ -112,6 +112,8 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
         node = rootnode
         state = rootstate.Clone()
 
+        v = 0
+
         # Select
         while node.untriedMoves == [] and node.childNodes != []: # node is fully expanded and non-terminal
             node = node.UCTSelectChild()
