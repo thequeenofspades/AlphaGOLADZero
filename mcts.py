@@ -120,18 +120,27 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
         # Expand and Evaluate - use NN to evalute leaf node
         # p, v = state.GetP(), state.GetV() # get outputs from NN
         p, v = nn.evaluate(state.Convert()) # get outputs from NN
-        all_ms = node.untriedMoves
-        while node.untriedMoves != []: # replace with while?
-            m = node.untriedMoves[0]
+        all_ms = list(node.untriedMoves) # create copy 
+        
+        # add Dirichlet noise if rootnode
+        if node == rootnode:
+            eps = 0.25
+        else:
+            eps = 0.
+        p_moves = np.array([(1 - eps) * extract_p_move(p, m, all_ms, nn) for m in all_ms]) + eps * np.random.dirichlet([0.03]*len(all_ms))
+        assert np.amin(p_moves) >= 0
+
+        # beam search
+        beam_width = min(10, len(p_moves))
+        idxs = np.argsort(p_moves)[-beam_width:] # index of moves with highest prob
+        for idx in idxs:
+            m = all_ms[idx]
             temp_state = state.Clone()
             temp_state.DoMove(m)
             # compute p_move from p
-            p_move = extract_p_move(p, m, all_ms, nn)
-            # add Dirichlet noise if rootnode
-            if node == rootnode:
-                eps = 0.25
-                p_move = (1 - eps) * p_move + eps * np.random.dirichlet([0.03])
-            node.AddChild(m, temp_state, p_move)
+            # p_move = extract_p_move(p, m, all_ms, nn)
+            p_move = p_moves[idx]
+            node.AddChild(m, temp_state, p_move) 
 
         # Backpropagate
         while node != None: # backpropagate from the expanded node and work back to the root node
