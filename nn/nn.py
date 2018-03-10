@@ -33,6 +33,9 @@ class NN():
         self.res_tower_height = config.res_tower_height
 
     def setup(self):
+        self.global_step = tf.Variable(tf.constant(0), trainable=False, name='global_step')
+        tf.add_to_collection('global_step', self.global_step)
+
         self.add_placeholders()
 
         # Compute Q values and grid probabilities for current state
@@ -44,17 +47,23 @@ class NN():
         self.add_train_op('scope')
 
         # Initialize all variables or restore from saved checkpoint
+        # all_vars = tf.global_variables() + tf.local_variables()
+        # restore_vars = [restore_var for restore_var in all_vars if 'global_step' not in restore_var.name]
         self.saver = tf.train.Saver()
         ckpt = tf.train.get_checkpoint_state(self.save_path)
         if ckpt and ckpt.model_checkpoint_path:
             self.saver.restore(self.sess, ckpt.model_checkpoint_path)
             print "Restored weights from checkpoint"
+            # init = tf.variables_initializer([self.global_step], name='init')
+            # self.sess.run(init)
+            print "Global step: %d" % (tf.train.global_step(self.sess, self.global_step))
         else:
             init = tf.global_variables_initializer()
             self.sess.run(init)
 
     def save_weights(self):
-        self.saver.save(self.sess, self.save_path + 'model_step_{}.ckpt'.format(self._steps))
+        #saver = tf.train.Saver()
+        self.saver.save(self.sess, self.save_path + 'model_step.ckpt', global_step=self.global_step)
 
     def add_placeholders(self):
         # State features for each time step in batch
@@ -169,7 +178,7 @@ class NN():
     def add_train_op(self, scope='Q_scope'):
         # Minimize training loss
         optimizer = tf.train.AdamOptimizer(learning_rate=self.lr)
-        self.train_op = optimizer.minimize(self.loss)
+        self.train_op = optimizer.minimize(self.loss, global_step=self.global_step)
 
     def evaluate(self, states):
         if len(states.shape) == 3:
