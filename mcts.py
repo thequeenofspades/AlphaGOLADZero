@@ -132,7 +132,7 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
             assert np.amin(p_moves) >= 0
 
             # beam search
-            beam_width = min(10, len(p_moves))
+            beam_width = min(config.beam_width, len(p_moves))
             idxs = np.argsort(p_moves)[-beam_width:] # index of moves with highest prob
             for idx in idxs:
                 m = all_ms[idx]
