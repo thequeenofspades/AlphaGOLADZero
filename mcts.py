@@ -112,17 +112,15 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
         node = rootnode
         state = rootstate.Clone()
 
-        v = 0
-
         # Select
         while node.untriedMoves == [] and node.childNodes != []: # node is fully expanded and non-terminal
             node = node.UCTSelectChild()
             state.DoMove(node.move)
 
         # Expand and Evaluate - use NN to evalute leaf node
+        # p, v = state.GetP(), state.GetV() # get outputs from NN
+        p, v = nn.evaluate(state.Convert()) # get outputs from NN
         if node.untriedMoves != []:
-            # p, v = state.GetP(), state.GetV() # get outputs from NN
-            p, v = nn.evaluate(state.Convert()) # get outputs from NN
             all_ms = list(node.untriedMoves) # create copy 
             
             # add Dirichlet noise if rootnode
