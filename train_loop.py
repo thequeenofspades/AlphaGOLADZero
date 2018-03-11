@@ -14,6 +14,8 @@ if __name__ == "__main__":
     batch_data = {}
     batch_data['s'], batch_data['pi'], batch_data['z'] = ([], [], [])
     data_path = os.path.join(config.save_path, 'batch_data_iter_{}.pkl')
+    data_paths = sorted([path for path in os.listdir(config.save_path) if 'batch_data_iter_' in path])
+    batch_data = pickle.load(open(os.path.join(config.save_path, data_paths[-1]), "rb"))
 
     for iteration in range(config.n_iters):
         
