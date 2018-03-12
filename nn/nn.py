@@ -170,9 +170,9 @@ class NN():
 
     def add_loss(self):
         # Minimize error between network predictions and MCTS predictions
-        self.loss = tf.square(self.z - self.v)
-        self.loss = self.loss - tf.reduce_sum(tf.multiply(self.mcts_probs, tf.log(self.probs)), 1)
-        self.loss = tf.reduce_mean(self.loss)
+        self.value_loss = tf.reduce_mean(tf.square(self.z - self.v))
+        self.prob_loss = tf.reduce_mean(tf.reduce_sum(tf.multiply(self.mcts_probs, tf.log(self.probs)), 1))
+        self.loss = self.value_loss - self.prob_loss
 
     def add_train_op(self, scope='Q_scope'):
         # Minimize training loss
@@ -192,17 +192,21 @@ class NN():
         states, mcts_probs, z = (np.array(x) for x in data)
         assert len(states) == len(mcts_probs) == len(z)
         avg_loss = 0.0
+        avg_val_loss = 0.0
+        avg_probs_loss = 0.0
         for step in range(self.train_steps):
             idx = np.random.choice(range(len(states)), self.batch_size, replace=False)
-            loss, _ = self.sess.run((self.loss, self.train_op), feed_dict={
+            loss, val_loss, prob_loss, _ = self.sess.run((self.loss, self.value_loss, self.prob_loss, self.train_op), feed_dict={
                 self.state_placeholder: states[idx],
                 self.z: z[idx],
                 self.mcts_probs: mcts_probs[idx],
                 self.training_placeholder: True
                 })
             avg_loss += loss
+            avg_val_loss += val_loss
+            avg_probs_loss += prob_loss
             if (step + 1) % self.print_freq == 0 and self.config.verbose:
-                print "Average loss after %d steps: %f" % (step+1, avg_loss / float(step))
+                print "Average loss after %d steps: total %f, value %f, probs %f" % (step+1, avg_loss / float(step), avg_val_loss / float(step), avg_probs_loss / float(step))
             if (step + 1) % self.save_freq == 0:
                 print "Saved weights after %d steps" % (step+1)
                 self.save_weights()
