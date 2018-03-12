@@ -121,18 +121,20 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
         # p, v = state.GetP(), state.GetV() # get outputs from NN
         p, v = nn.evaluate(state.Convert()) # get outputs from NN
         if node.untriedMoves != []:
-            all_ms = list(node.untriedMoves) # create copy 
+            all_ms = list(node.untriedMoves) # create copy
+            n_moves = len(all_ms)
             
             # add Dirichlet noise if rootnode
             if node == rootnode:
                 eps = 0.25
+                beam_width = n_moves
             else:
                 eps = 0.
-            p_moves = np.array([(1 - eps) * extract_p_move(p, m, all_ms, nn) for m in all_ms]) + eps * np.random.dirichlet([0.03]*len(all_ms))
+                beam_width = min(config.beam_width, n_moves)
+            p_moves = np.array([(1 - eps) * extract_p_move(p, m, all_ms, nn) for m in all_ms]) + eps * np.random.dirichlet([0.03]*n_moves)
             assert np.amin(p_moves) >= 0
 
             # beam search
-            beam_width = min(config.beam_width, len(p_moves))
             idxs = np.argsort(p_moves)[-beam_width:] # index of moves with highest prob
             for idx in idxs:
                 m = all_ms[idx]
@@ -164,7 +166,7 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
     move_tuples = [(c.move.move_type, c.move.target_point, c.move.sacrifice_points) for c in rootnode.childNodes]
     for i, move_tuple in enumerate(move_tuples):
         if move_tuple[1] is not None:
-            pi_t[nn.coords_to_idx(move_tuple[1].x, move_tuple[1].y)] = pi[i] # TODO: check dtype of move.target_point
+            pi_t[nn.coords_to_idx(move_tuple[1].x, move_tuple[1].y)] += pi[i] # TODO: check dtype of move.target_point
         else: # pass
             assert move_tuple[0] == MoveType.PASS
             pi_t[-1] = pi[i]
