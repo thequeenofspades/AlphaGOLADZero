@@ -121,18 +121,20 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
         # p, v = state.GetP(), state.GetV() # get outputs from NN
         p, v = nn.evaluate(state.Convert()) # get outputs from NN
         if node.untriedMoves != []:
-            all_ms = list(node.untriedMoves) # create copy 
+            all_ms = list(node.untriedMoves) # create copy
+            n_moves = len(all_ms)
             
             # add Dirichlet noise if rootnode
             if node == rootnode:
                 eps = 0.25
+                beam_width = n_moves
             else:
                 eps = 0.
-            p_moves = np.array([(1 - eps) * extract_p_move(p, m, all_ms, nn) for m in all_ms]) + eps * np.random.dirichlet([0.03]*len(all_ms))
+                beam_width = min(config.beam_width, n_moves)
+            p_moves = np.array([(1 - eps) * extract_p_move(p, m, all_ms, nn) for m in all_ms]) + eps * np.random.dirichlet([0.03]*n_moves)
             assert np.amin(p_moves) >= 0
 
             # beam search
-            beam_width = min(config.beam_width, len(p_moves))
             idxs = np.argsort(p_moves)[-beam_width:] # index of moves with highest prob
             for idx in idxs:
                 m = all_ms[idx]
