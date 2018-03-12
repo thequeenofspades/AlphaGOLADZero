@@ -192,11 +192,7 @@ class NN():
         states, mcts_probs, z = (np.array(x) for x in data)
         assert len(states) == len(mcts_probs) == len(z)
         avg_loss = 0.0
-        self.lr = self.config.lr
         for step in range(self.train_steps):
-            # Anneal learning rate as in the Nature paper
-            if (step + 1) == 400 or (step + 1) == 600:
-                self.lr = self.lr / float(10)
             idx = np.random.choice(range(len(states)), self.batch_size, replace=False)
             loss, _ = self.sess.run((self.loss, self.train_op), feed_dict={
                 self.state_placeholder: states[idx],
