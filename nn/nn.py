@@ -111,7 +111,7 @@ class NN():
             conv2,
             is_training=is_training,
             scope=scope+'/res_norm2_'+str(index))
-        skip = conv1 + X
+        skip = norm2 + X
         relu2 = tf.nn.relu(skip)
         return relu2
 
