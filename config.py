@@ -4,6 +4,8 @@ class config():
     mcts_itermax = 10
     # Beam width for MCTS
     beam_width = 10
+    # whether to take random birth action
+    do_rand_birth = True
 
     # Game board dimensions
     board_width = 6
