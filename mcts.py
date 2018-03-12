@@ -164,7 +164,7 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
     move_tuples = [(c.move.move_type, c.move.target_point, c.move.sacrifice_points) for c in rootnode.childNodes]
     for i, move_tuple in enumerate(move_tuples):
         if move_tuple[1] is not None:
-            pi_t[nn.coords_to_idx(move_tuple[1].x, move_tuple[1].y)] = pi[i] # TODO: check dtype of move.target_point
+            pi_t[nn.coords_to_idx(move_tuple[1].x, move_tuple[1].y)] += pi[i] # TODO: check dtype of move.target_point
         else: # pass
             assert move_tuple[0] == MoveType.PASS
             pi_t[-1] = pi[i]
