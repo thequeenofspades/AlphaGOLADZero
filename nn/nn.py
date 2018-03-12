@@ -177,7 +177,9 @@ class NN():
     def add_train_op(self, scope='Q_scope'):
         # Minimize training loss
         optimizer = tf.train.AdamOptimizer(learning_rate=self.lr)
-        self.train_op = optimizer.minimize(self.loss, global_step=self.global_step)
+        gradients, variables = zip(*optimizer.compute_gradients(self.loss))
+        gradients, _ = tf.clip_by_global_norm(gradients, 5.0)
+        self.train_op = optimizer.apply_gradients(zip(gradients, variables), global_step=self.global_step)
 
     def evaluate(self, states):
         if len(states.shape) == 3:
