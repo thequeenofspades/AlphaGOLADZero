@@ -130,7 +130,7 @@ class GOLADState(GameState):
         elif self.timestep >= self.max_timestep:
             self.terminal = 3
 
-    def GetMoves(self, do_rand_birth=False):
+    def GetMoves(self, do_rand_birth=config.do_rand_birth):
         """ Get all possible moves from this state.
         """
         moves = []
