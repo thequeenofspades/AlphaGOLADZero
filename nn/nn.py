@@ -49,7 +49,7 @@ class NN():
         # Initialize all variables or restore from saved checkpoint
         # all_vars = tf.global_variables() + tf.local_variables()
         # restore_vars = [restore_var for restore_var in all_vars if 'global_step' not in restore_var.name]
-        self.saver = tf.train.Saver()
+        self.saver = tf.train.Saver(max_to_keep=None)
         ckpt = tf.train.get_checkpoint_state(self.save_path)
         if ckpt and ckpt.model_checkpoint_path:
             self.saver.restore(self.sess, ckpt.model_checkpoint_path)
@@ -63,6 +63,7 @@ class NN():
 
     def save_weights(self):
         #saver = tf.train.Saver()
+        print('Saving to {} with global step {}'.format(self.save_path + 'model_step.ckpt', self.global_step))
         self.saver.save(self.sess, self.save_path + 'model_step.ckpt', global_step=self.global_step)
 
     def add_placeholders(self):
