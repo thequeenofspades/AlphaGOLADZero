@@ -26,6 +26,7 @@ from bot.game import Game
 from bot.bot import Bot, MctsBot
 
 def main():
+    config.tau = 1e-3
     nn = NN(config)
     nn.setup()
     bot = MctsBot(nn)
