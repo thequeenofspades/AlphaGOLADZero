@@ -11,6 +11,8 @@ if __name__ == "__main__":
     nn = NN(config)
     nn.setup()
     
+    pickle.dump(config, open(os.path.join(config.save_path, 'config.pkl'), 'wb'), pickle.HIGHEST_PROTOCOL)
+    
     batch_data = {}
     batch_data['s'], batch_data['pi'], batch_data['z'] = ([], [], [])
     data_path = os.path.join(config.save_path, 'batch_data_iter_{}.pkl')
