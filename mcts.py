@@ -172,6 +172,7 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
         else: # pass
             assert move_tuple[0] == MoveType.PASS
             pi_t[-1] = pi[i]
+    assert np.abs(np.sum(pi_t) - 1.) <= 1e-5, np.sum(pi_t)
     
     if verbose:
         print('Total time for move: {} sec'.format(time.time()-start))
