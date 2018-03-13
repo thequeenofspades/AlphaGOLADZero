@@ -130,7 +130,7 @@ class GOLADState(GameState):
         elif self.timestep >= self.max_timestep:
             self.terminal = 3
 
-    def GetMoves(self):
+    def GetMoves(self, do_rand_birth=False):
         """ Get all possible moves from this state.
         """
         moves = []
@@ -155,8 +155,13 @@ class GOLADState(GameState):
             moves.append(Move(MoveType.KILL, kill_cell))
         # Generate birth moves
         for birth_cell in dead_cells:
-            for sacrifice_cells in itertools.combinations(my_cells, 2):
-                moves.append(Move(MoveType.BIRTH, birth_cell, [sacrifice_cells[0], sacrifice_cells[1]]))
+            if do_rand_birth: 
+                if len(my_cells) > 1:
+                    idx0, idx1 = np.random.choice(len(my_cells), 2, replace=False)
+                    moves.append(Move(MoveType.BIRTH, birth_cell, [my_cells[idx0], my_cells[idx1]]))
+            else:
+                for sacrifice_cells in itertools.combinations(my_cells, 2):
+                    moves.append(Move(MoveType.BIRTH, birth_cell, [sacrifice_cells[0], sacrifice_cells[1]]))
         # Generate pass move
         moves.append(Move(MoveType.PASS))
         return moves

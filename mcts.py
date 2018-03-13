@@ -23,7 +23,7 @@ from field.field import Field
 from game_state import GameState
 from game_state import GOLADState
 from move.move_type import MoveType
-
+import time
 from nn.nn import NN
 
 from config import config
@@ -39,7 +39,7 @@ class Node:
         self.total_rewards = 0
         self.total_visits = 0
         self.prior = prior
-        self.untriedMoves = state.GetMoves() # future child nodes
+        self.untriedMoves = state.GetMoves(config.do_rand_birth) # future child nodes
         self.player = state.current_player # 0(me) or 1(opponent) TODO: might not be necessary since perspective of v is taken care of by NN
         self.state = state
         
@@ -105,6 +105,7 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
         Return the best move from the rootstate.
         Assumes 2 alternating players (player 0 starts), with game rewards {-1, +1}."""
 
+    start = time.time()
     if rootnode is None:
         rootnode = Node(player=0, state=rootstate)
 
@@ -152,7 +153,8 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
             else:
                 node.Update(-v)
             node = node.parentNode
-
+        
+        
     # Output some information about the tree - can be omitted
     # if (verbose): print rootnode.TreeToString(0)
     # else: print rootnode.ChildrenToString()
@@ -170,7 +172,10 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
         else: # pass
             assert move_tuple[0] == MoveType.PASS
             pi_t[-1] = pi[i]
+    assert np.abs(np.sum(pi_t) - 1.) <= 1e-5, np.sum(pi_t)
     
+    if verbose:
+        print('Total time for move: {} sec'.format(time.time()-start))
     return np.random.choice(rootnode.childNodes, p=pi), pi_t # return child node sampled from pi and pi_t
 
 def init_cells(width = 18, height = 16, cells_each_player = 50):
@@ -203,7 +208,7 @@ def UCTPlayGame(nn, nn2=None):
     c = None
     current_nn = nn # use nn for first player
     while (state.GetMoves() != []):
-        c, pi= UCT(rootstate = state, itermax = config.mcts_itermax, nn=current_nn, verbose = False, rootnode = c)
+        c, pi= UCT(rootstate = state, itermax = config.mcts_itermax, nn=current_nn, verbose = config.verbose, rootnode = c)
         m = c.move
         data['s'].append(state.Convert())
         data['pi'].append(pi)
@@ -220,6 +225,7 @@ def UCTPlayGame(nn, nn2=None):
 
     if config.verbose:
         print('Result: {}'.format(state.GetResult(0)))
+        state.field.pprint()
     data['z'] = [[state.GetResult(0)]] * len(data['s']) # get result from perspective of first player (ie rootnode)
     
     return data
