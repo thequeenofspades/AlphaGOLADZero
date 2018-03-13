@@ -1,7 +1,7 @@
 class config():
     verbose = True
     # Number of iterations for MCTS
-    mcts_itermax = 10
+    mcts_itermax = 20
     # Beam width for MCTS
     beam_width = 10
     # whether to take random birth action
@@ -16,15 +16,15 @@ class config():
 
     # NN params
     lr = 0.01
-    batch_size = 5
+    batch_size = 16
     n_actions = 3
-    train_steps = 1000
+    train_steps = 15000
     max_ep_length = 20
-    save_freq = 10
-    print_freq = 100
+    save_freq = 5000
+    print_freq = 500
     save_path = 'weights/'
-    res_tower_height = 19
+    res_tower_height = 3
     
     # Outer loop params
-    n_iters = 100
-    buffer_size = 5
+    n_iters = 200
+    buffer_size = 150
