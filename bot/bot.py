@@ -110,3 +110,12 @@ class RandomBot(Bot):
         random_kill = living_cells[random.randrange(len(living_cells))]
 
         return Move(MoveType.KILL, random_kill)
+
+class PassBot(Bot):
+
+    def __init__(self):
+        random.seed()  # set seed here if needed
+
+    def make_move(self, game):
+        return Move(MoveType.PASS)
+
