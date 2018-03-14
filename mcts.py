@@ -107,13 +107,13 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None, file = None):
 
     file.write("started UCT\n")
     start = time.time()
-    file.write("did the time.time() thing\n")
+    file.write("started clock\n")
     if rootnode is None:
         rootnode = Node(player=0, state=rootstate)
         file.write("initialized rootnode\n")
 
     for i in range(itermax):
-        file.write('Got to iteration %d\n' % (i+1))
+        file.write('Got to iteration %d at %f time\n' % (i+1, time.time() - start))
         node = rootnode
         state = rootstate.Clone()
 
@@ -157,6 +157,8 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None, file = None):
             else:
                 node.Update(-v)
             node = node.parentNode
+
+    file.write("Finished all iterations at %f time\n" % (time.time() - start))
         
         
     # Output some information about the tree - can be omitted
@@ -170,6 +172,7 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None, file = None):
 
     pi_t = np.zeros((nn.board_w * nn.board_h + 1))
     move_tuples = [(c.move.move_type, c.move.target_point, c.move.sacrifice_points) for c in rootnode.childNodes]
+    file.write("created move tuples at %f time\n" % (time.time() - start))
     for i, move_tuple in enumerate(move_tuples):
         if move_tuple[1] is not None:
             pi_t[nn.coords_to_idx(move_tuple[1].x, move_tuple[1].y)] += pi[i] # TODO: check dtype of move.target_point
