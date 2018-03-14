@@ -115,6 +115,7 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
         file.write('On iter %d at %f time\n' % (i, time.time() - start))
         node = rootnode
         state = rootstate.Clone()
+        file.write('Cloned rootstate\n')
 
         # Select
         while node.untriedMoves == [] and node.childNodes != []: # node is fully expanded and non-terminal
@@ -123,7 +124,9 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
 
         # Expand and Evaluate - use NN to evalute leaf node
         # p, v = state.GetP(), state.GetV() # get outputs from NN
+        file.write('About to evaluate\n')
         p, v = nn.evaluate(state.Convert()) # get outputs from NN
+        file.write('Evaluated with NN\n')
         if node.untriedMoves != []:
             all_ms = list(node.untriedMoves) # create copy
             n_moves = len(all_ms)
@@ -149,6 +152,7 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
                 p_move = p_moves[idx]
                 node.AddChild(m, temp_state, p_move) 
 
+        file.write('About to backprop\n')
         # Backpropagate
         while node != None: # backpropagate from the expanded node and work back to the root node
             if node.player == state.current_player:
