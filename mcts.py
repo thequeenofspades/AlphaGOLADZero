@@ -112,8 +112,7 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
     file = open('errorlog.txt', 'a+')
 
     for i in range(itermax):
-        if verbose:
-            file.write('Got to iteration %d' % (i+1))
+        file.write('Got to iteration %d' % (i+1))
         node = rootnode
         state = rootstate.Clone()
 
@@ -178,8 +177,7 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
             pi_t[-1] = pi[i]
     assert np.abs(np.sum(pi_t) - 1.) <= 1e-5, np.sum(pi_t)
     
-    if verbose:
-        file.write('Total time for move: {} sec'.format(time.time()-start))
+    file.write('Total time for move: {} sec'.format(time.time()-start))
     file.close()
     return np.random.choice(rootnode.childNodes, p=pi), pi_t # return child node sampled from pi and pi_t
 
