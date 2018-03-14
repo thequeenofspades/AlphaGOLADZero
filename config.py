@@ -26,6 +26,7 @@ class config():
     save_freq = 15000
     print_freq = 500
     save_path = 'weights/'
+    weights_to_restore = None
     res_tower_height = 3
     
     # Outer loop params

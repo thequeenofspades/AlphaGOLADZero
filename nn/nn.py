@@ -52,8 +52,11 @@ class NN():
         self.saver = tf.train.Saver(max_to_keep=None)
         ckpt = tf.train.get_checkpoint_state(self.save_path)
         if ckpt and ckpt.model_checkpoint_path:
-            self.saver.restore(self.sess, ckpt.model_checkpoint_path)
-            print "Restored weights from checkpoint"
+            model_checkpoint_path = ckpt.model_checkpoint_path
+            if self.config.weights_to_restore != None:
+                model_checkpoint_path = self.save_path + 'model_step.ckpt-' + str(self.config.weights_to_restore)
+            self.saver.restore(self.sess, model_checkpoint_path)
+            print "Restored weights from %s" % model_checkpoint_path
             # init = tf.variables_initializer([self.global_step], name='init')
             # self.sess.run(init)
             print "Global step: %d" % (tf.train.global_step(self.sess, self.global_step))
@@ -63,7 +66,7 @@ class NN():
 
     def save_weights(self):
         #saver = tf.train.Saver()
-        print('Saving to {} with global step {}'.format(self.save_path + 'model_step.ckpt', self.global_step))
+        print('Saving to {} with global step {}'.format(self.save_path + 'model_step.ckpt', tf.train.global_step(self.sess, self.global_step)))
         self.saver.save(self.sess, self.save_path + 'model_step.ckpt', global_step=self.global_step)
 
     def add_placeholders(self):
