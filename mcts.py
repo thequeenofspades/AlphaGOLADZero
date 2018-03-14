@@ -112,6 +112,7 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
     for i in range(itermax):
         if verbose:
             stdout.write("Starting iteration %d" % (i + 1))
+            stdout.flush()
         node = rootnode
         state = rootstate.Clone()
 
