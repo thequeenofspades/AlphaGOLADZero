@@ -14,7 +14,7 @@
         "command": "python ../mcts_bot_main.py"
       },
       {
-        "command": "python ../pass_bot_main.py"
+        "command": "python ../random_bot_main.py"
       }
     ],
     "engine": {
