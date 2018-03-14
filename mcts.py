@@ -105,11 +105,14 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
         Return the best move from the rootstate.
         Assumes 2 alternating players (player 0 starts), with game rewards {-1, +1}."""
 
+    file = open('errorlog.txt', 'w+', 0)
+
     start = time.time()
     if rootnode is None:
         rootnode = Node(player=0, state=rootstate)
 
     for i in range(itermax):
+        file.write('On iter %d at %f time\n' % (i, time.time() - start))
         node = rootnode
         state = rootstate.Clone()
 
@@ -162,6 +165,7 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
     # Select move to play using exponentiated visit count
     tau = config.tau
     exp_visits = np.array([np.power(c.total_visits, 1./tau) for c in rootnode.childNodes]) + 1e-10
+    file.write('np.sum(exp_visits): %f' % np.sum(exp_visits))
     pi = exp_visits / np.sum(exp_visits)
 
     pi_t = np.zeros((nn.board_w * nn.board_h + 1))
@@ -172,10 +176,12 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
         else: # pass
             assert move_tuple[0] == MoveType.PASS
             pi_t[-1] = pi[i]
+    file.write('np.sum(pi_t): %f' % np.sum(pi_t))
     assert np.abs(np.sum(pi_t) - 1.) <= 1e-5, np.sum(pi_t)
     
     if verbose:
         print('Total time for move: {} sec'.format(time.time()-start))
+        file.write('Total time for move: {} sec'.format(time.time()-start))
     return np.random.choice(rootnode.childNodes, p=pi), pi_t # return child node sampled from pi and pi_t
 
 def init_cells(width = 18, height = 16, cells_each_player = 50):
