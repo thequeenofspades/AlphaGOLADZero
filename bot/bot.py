@@ -33,6 +33,9 @@ class MctsBot(Bot):
         Performs a Birth or a Kill move, currently returns a random move.
         Implement this method to make the bot smarter.
         """
+        file = open('errorlog.txt', 'a+')
+        file.write('making a move\n')
+        file.close()
         
         state = GOLADState(field=game.field)
         state.current_player = int(game.me.id)
