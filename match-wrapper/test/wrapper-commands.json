@@ -6,7 +6,7 @@
     "resultFile": "./resultfile.json",
     "propagateBotExitCode": false,
     "debug": true,
-    "suppressEngineIO": true
+    "suppressEngineIO": false
   },
   "match": {
     "bots": [
@@ -22,11 +22,11 @@
       "configuration": {
         "fieldWidth": {
           "type": "integer",
-          "value": 6
+          "value": 8
         },
         "fieldHeight": {
           "type": "integer",
-          "value": 6
+          "value": 8
         },
         "initialCellsPerPlayer": {
           "type": "integer",

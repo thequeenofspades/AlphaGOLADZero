@@ -110,6 +110,8 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
         rootnode = Node(player=0, state=rootstate)
 
     for i in range(itermax):
+        if verbose:
+            print "Starting iteration %d" % (i + 1)
         node = rootnode
         state = rootstate.Clone()
 

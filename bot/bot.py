@@ -36,7 +36,7 @@ class MctsBot(Bot):
         
         state = GOLADState(field=game.field)
         state.current_player = int(game.me.id)
-        c, pi= UCT(rootstate = state, itermax = config.mcts_itermax, nn=self.nn, verbose = False)
+        c, pi= UCT(rootstate = state, itermax = config.mcts_itermax, nn=self.nn, verbose = True)
 
         return c.move
 
