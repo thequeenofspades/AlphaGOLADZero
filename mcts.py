@@ -106,10 +106,11 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
         Assumes 2 alternating players (player 0 starts), with game rewards {-1, +1}."""
 
     start = time.time()
+    file = open('errorlog.txt', 'a+')
+    file.write("started UCT\n")
     if rootnode is None:
         rootnode = Node(player=0, state=rootstate)
-
-    file = open('errorlog.txt', 'a+')
+        file.write("initialized rootnode\n")
 
     for i in range(itermax):
         file.write('Got to iteration %d\n' % (i+1))

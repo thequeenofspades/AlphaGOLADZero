@@ -35,10 +35,12 @@ class MctsBot(Bot):
         """
         file = open('errorlog.txt', 'a+')
         file.write('making a move\n')
-        file.close()
-        
+
         state = GOLADState(field=game.field)
+        file.write("initialized the state\n")
         state.current_player = int(game.me.id)
+        file.write("set current player\n")
+        file.close()
         c, pi= UCT(rootstate = state, itermax = config.mcts_itermax, nn=self.nn, verbose = True)
 
         return c.move
