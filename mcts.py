@@ -174,11 +174,13 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None, file = None):
     move_tuples = [(c.move.move_type, c.move.target_point, c.move.sacrifice_points) for c in rootnode.childNodes]
     file.write("created move tuples at %f time\n" % (time.time() - start))
     for i, move_tuple in enumerate(move_tuples):
+        file.write("looking at move tuple i at %f time\n" % (time.time() - start))
         if move_tuple[1] is not None:
             pi_t[nn.coords_to_idx(move_tuple[1].x, move_tuple[1].y)] += pi[i] # TODO: check dtype of move.target_point
         else: # pass
             assert move_tuple[0] == MoveType.PASS
             pi_t[-1] = pi[i]
+    file.write("finished creating probs at %f time\n" % (time.time() - start))
     assert np.abs(np.sum(pi_t) - 1.) <= 1e-5, np.sum(pi_t)
     
     file.write('Total time for move: {} sec\n'.format(time.time()-start))
