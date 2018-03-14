@@ -100,14 +100,14 @@ def extract_p_move(p, m, all_ms, nn):
         assert False
     
 
-def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
+def UCT(rootstate, itermax, nn, verbose = False, rootnode = None, file = None):
     """ Conduct a UCT search for itermax iterations starting from rootstate.
         Return the best move from the rootstate.
         Assumes 2 alternating players (player 0 starts), with game rewards {-1, +1}."""
 
-    start = time.time()
-    file = open('errorlog.txt', 'a+')
     file.write("started UCT\n")
+    start = time.time()
+    file.write("did the time.time() thing\n")
     if rootnode is None:
         rootnode = Node(player=0, state=rootstate)
         file.write("initialized rootnode\n")

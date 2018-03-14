@@ -40,8 +40,7 @@ class MctsBot(Bot):
         file.write("initialized the state\n")
         state.current_player = int(game.me.id)
         file.write("set current player\n")
-        file.close()
-        c, pi= UCT(rootstate = state, itermax = config.mcts_itermax, nn=self.nn, verbose = True)
+        c, pi= UCT(rootstate = state, itermax = config.mcts_itermax, nn=self.nn, verbose = True, file = file)
 
         return c.move
 
