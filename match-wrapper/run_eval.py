@@ -38,7 +38,7 @@ def run_eval(num_matches, iters=None):
     print ("Results of " + str(num_matches) + " matches:")
     game_result_file.write('Results of ' + str(num_matches) + ' matches:\n')
     print (game_results)
-    game_result_file.write(game_results)
+    game_result_file.write(str(game_results) + '\n')
     game_result_file.write('\n')
     game_result_file.close()
     
