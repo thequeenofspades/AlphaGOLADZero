@@ -19,8 +19,10 @@ if __name__ == "__main__":
     data_paths = sorted([path for path in os.listdir(config.save_path) if 'batch_data_iter_' in path])
     if data_paths != []:
         batch_data = pickle.load(open(os.path.join(config.save_path, data_paths[-1]), "rb"))
+        for k in batch_data.keys(): # remove oldest 25% from buffer
+            batch_data[k] = batch_data[k][int(0.25*config.buffer_size):]
 
-    for iteration in range(config.n_iters):
+    for iteration in range(config.eval_frequency):
         
         # Collect self-play data from MCTS
         while len(batch_data['s']) < config.buffer_size:

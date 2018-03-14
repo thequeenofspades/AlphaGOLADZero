@@ -2,7 +2,7 @@ import sys
 import subprocess
 import json
 
-def run_eval(num_matches):
+def run_eval(num_matches, iters=None):
     result_json_file = "resultfile.json"
 
     winner_dict = [{'0':'random_bot','1':'mcts_bot','null':'draw'},
@@ -30,8 +30,21 @@ def run_eval(num_matches):
             else:
                 game_results[winner] += 1
 
+    game_result_filename = 'eval_results.txt'
+    if iters != None:
+        game_result_filename = 'eval_results_%d.txt' % int(iters)
+    game_result_file = open(game_result_filename, 'w+')
+
     print ("Results of " + str(num_matches) + " matches:")
+    game_result_file.write('Results of ' + str(num_matches) + ' matches:\n')
     print (game_results)
+    game_result_file.write(game_results)
+    game_result_file.write('\n')
+    game_result_file.close()
     
 if __name__ == '__main__':
-    run_eval(int(sys.argv[1]))
+    num_matches = int(sys.argv[1])
+    iters = None
+    if len(sys.argv) > 2:
+        iters = int(sys.argv[2])
+    run_eval(num_matches, iters)

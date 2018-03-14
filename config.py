@@ -11,8 +11,8 @@ class config():
     do_rand_birth = True
 
     # Game board dimensions
-    board_width = 6
-    board_height = 6
+    board_width = 8
+    board_height = 8
 
     # Board initialization
     cells_each_player = 10
@@ -23,11 +23,13 @@ class config():
     n_actions = 3
     train_steps = 15000
     max_ep_length = 20
-    save_freq = 5000
+    save_freq = 15000
     print_freq = 500
     save_path = 'weights/'
     res_tower_height = 3
     
     # Outer loop params
     n_iters = 200
-    buffer_size = 150
+    eval_freq = 10
+    buffer_size = 200
+    n_eval_games = 100
