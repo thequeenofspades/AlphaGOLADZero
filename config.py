@@ -2,6 +2,7 @@ class config():
     verbose = True
     #MCTS Params
     tau = 1.
+    eval_tau = 0.1
     # Number of iterations for MCTS
     mcts_itermax = 20
     # Beam width for MCTS
