@@ -22,7 +22,7 @@ if __name__ == "__main__":
         for k in batch_data.keys(): # remove oldest 25% from buffer
             batch_data[k] = batch_data[k][int(0.25*config.buffer_size):]
 
-    for iteration in range(config.eval_frequency):
+    for iteration in range(config.eval_freq):
         
         # Collect self-play data from MCTS
         while len(batch_data['s']) < config.buffer_size:
