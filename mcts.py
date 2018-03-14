@@ -109,10 +109,11 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
     if rootnode is None:
         rootnode = Node(player=0, state=rootstate)
 
+    file = open('errorlog.txt', 'a+')
+
     for i in range(itermax):
         if verbose:
-            stdout.write("Starting iteration %d" % (i + 1))
-            stdout.flush()
+            file.write('Got to iteration %d' % (i+1))
         node = rootnode
         state = rootstate.Clone()
 
@@ -178,7 +179,8 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None):
     assert np.abs(np.sum(pi_t) - 1.) <= 1e-5, np.sum(pi_t)
     
     if verbose:
-        stdout.write('Total time for move: {} sec'.format(time.time()-start))
+        file.write('Total time for move: {} sec'.format(time.time()-start))
+    file.close()
     return np.random.choice(rootnode.childNodes, p=pi), pi_t # return child node sampled from pi and pi_t
 
 def init_cells(width = 18, height = 16, cells_each_player = 50):

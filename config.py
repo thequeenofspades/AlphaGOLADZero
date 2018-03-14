@@ -10,8 +10,8 @@ class config():
     do_rand_birth = True
 
     # Game board dimensions
-    board_width = 6
-    board_height = 6
+    board_width = 8
+    board_height = 8
 
     # Board initialization
     cells_each_player = 10
