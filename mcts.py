@@ -165,6 +165,7 @@ def UCT(rootstate, itermax, nn, verbose = False, rootnode = None, file = None):
     # Select move to play using exponentiated visit count
     tau = config.tau
     exp_visits = np.array([np.power(c.total_visits, 1./tau) for c in rootnode.childNodes]) + 1e-10
+    file.write("np.sum(exp_visits): %f" % (np.sum(exp_visits)))
     pi = exp_visits / np.sum(exp_visits)
 
     pi_t = np.zeros((nn.board_w * nn.board_h + 1))
