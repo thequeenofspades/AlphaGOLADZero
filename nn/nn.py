@@ -102,7 +102,7 @@ class NN():
             scope=scope+'/res_conv1_'+str(index))
         norm1 = tf.contrib.layers.batch_norm(
             conv1,
-            update_collections=None,
+            updates_collections=None,
             is_training=is_training,
             scope=scope+'/res_norm1_'+str(index))
         relu1 = tf.nn.relu(norm1)
