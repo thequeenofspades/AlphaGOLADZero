@@ -114,7 +114,7 @@ class NN():
             scope=scope+'/res_conv2_'+str(index))
         norm2 = tf.contrib.layers.batch_norm(
             conv2,
-            update_collections=None,
+            updates_collections=None,
             is_training=is_training,
             scope=scope+'/res_norm2_'+str(index))
         skip = norm2 + X
@@ -130,7 +130,7 @@ class NN():
             scope=scope+'/policy_head_conv')
         norm = tf.contrib.layers.batch_norm(
             conv,
-            update_collections=None,
+            updates_collections=None,
             is_training=is_training,
             scope=scope+'/policy_head_norm')
         relu = tf.nn.relu(norm)
@@ -150,7 +150,7 @@ class NN():
             scope=scope+'/value_head_conv')
         norm = tf.contrib.layers.batch_norm(
             conv,
-            update_collections=None,
+            updates_collections=None,
             is_training=is_training,
             scope=scope+'/value_head_norm')
         relu = tf.nn.relu(norm)
