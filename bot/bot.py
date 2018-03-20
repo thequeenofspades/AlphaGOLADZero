@@ -117,5 +117,26 @@ class PassBot(Bot):
         random.seed()  # set seed here if needed
 
     def make_move(self, game):
+        """
+        Always makes a PASS move.
+        """
         return Move(MoveType.PASS)
 
+class KillBot(Bot):
+
+    def __init__(self):
+        random.seed()  # set seed here if needed
+        
+    def make_move(self, game):
+        """
+        Kills a random opponent cell. 
+        """
+        cell_map = game.field.get_cell_mapping()
+        opponent_cells = cell_map.get(game.opponent.id, [])
+        
+        if len(opponent_cells) <= 0:
+            return Move(MoveType.PASS)
+            
+        random_kill = opponent_cells[random.randrange(len(opponent_cells))]
+        
+        return Move(MoveType.KILL, random_kill)
